@@ -5,7 +5,7 @@ import { userSchema } from "./user/user.schema";
 import dayjs from "dayjs";
 import weekOfYear from 'dayjs/plugin/weekOfYear';
 import { z } from "zod";
-import { conn } from './db/mysqlconnection';
+import { conn } from './db/mysqlconnection1';
 var customParseFormat = require('dayjs/plugin/customParseFormat')
 
 interface Worker {
@@ -43,7 +43,8 @@ export async function appRoutes(app: FastifyInstance) {
   // Route to get all workers
   app.get('/workers', async (request, reply) => {
     try {
-      const [dbResponse] = await conn.query('SELECT id, name, surname, role, email, photo, color FROM `users`');
+      const connection = await conn();
+      const [dbResponse] = await connection.query('SELECT id, name, surname, role, email, photo, color FROM `users`');
       reply.send(dbResponse);
     } catch (error) {
       console.error('Error executing query:', error);
@@ -54,7 +55,8 @@ export async function appRoutes(app: FastifyInstance) {
   // Route to get all service orders
   app.get('/AllOrders', async (request, reply) => {
     try {
-      const [dbResponse] = await conn.query('SELECT * FROM `service_orders`');
+const connection = await conn();
+      const [dbResponse] = await connection.query('SELECT * FROM `service_orders`');
       reply.send(dbResponse);
     } catch (error) {
       console.error('Error executing query:', error);
@@ -65,7 +67,8 @@ export async function appRoutes(app: FastifyInstance) {
   // Route to get the count of new orders
   app.get('/NewOrders', async (request, reply) => {
     try {
-      const [dbResponse] = await conn.query('SELECT id FROM `service_orders` WHERE `status` = ?', ['new']);
+const connection = await conn();
+      const [dbResponse] = await connection.query('SELECT id FROM `service_orders` WHERE `status` = ?', ['new']);
       let result = Object.values(JSON.parse(JSON.stringify(dbResponse)));
       var total = 0;
       result.forEach(() => {
@@ -81,7 +84,8 @@ export async function appRoutes(app: FastifyInstance) {
   // Route to get unassigned orders
   app.get('/UnassignedOrders', async (request, reply) => {
     try {
-      const [dbResponse] = await conn.query('SELECT * FROM `service_orders` WHERE `status` IN (?, ?)', ['new', 'unassigned']);
+const connection = await conn();
+      const [dbResponse] = await connection.query('SELECT * FROM `service_orders` WHERE `status` IN (?, ?)', ['new', 'unassigned']);
       reply.send(dbResponse);
     } catch (error) {
       console.error('Error executing query:', error);
@@ -97,7 +101,8 @@ export async function appRoutes(app: FastifyInstance) {
       });
       const { orderId } = getOrderParam.parse(request.query);
       const parsedOrderId = Number(orderId);
-      const [dbResponse] = await conn.query('SELECT id, title, costumer, description, annotation, planned_hours FROM `service_orders` WHERE `id` = ?', [parsedOrderId]);
+const connection = await conn();
+      const [dbResponse] = await connection.query('SELECT id, title, costumer, description, annotation, planned_hours FROM `service_orders` WHERE `id` = ?', [parsedOrderId]);
       reply.send(dbResponse);
     } catch (error) {
       console.error('Error executing query:', error);
@@ -108,7 +113,8 @@ export async function appRoutes(app: FastifyInstance) {
   // Route to get the count of unassigned orders
   app.get('/UnassignedOrdersCount', async (request, reply) => {
     try {
-      const [dbResponse] = await conn.query('SELECT id FROM `service_orders` WHERE `status` IN (?, ?)', ['new', 'unassigned']);
+const connection = await conn();
+      const [dbResponse] = await connection.query('SELECT id FROM `service_orders` WHERE `status` IN (?, ?)', ['new', 'unassigned']);
       let result = Object.values(JSON.parse(JSON.stringify(dbResponse)));
       var total = 0;
       result.forEach(() => {
@@ -124,7 +130,8 @@ export async function appRoutes(app: FastifyInstance) {
   // Route to get the count of completed orders
   app.get('/CompletedOrders', async (request, reply) => {
     try {
-      const [dbResponse] = await conn.query('SELECT id FROM `service_orders` WHERE `status` = ?', ['completed']);
+const connection = await conn();
+      const [dbResponse] = await connection.query('SELECT id FROM `service_orders` WHERE `status` = ?', ['completed']);
       let result = Object.values(JSON.parse(JSON.stringify(dbResponse)));
       var total = 0;
       result.forEach(() => {
@@ -142,7 +149,8 @@ export async function appRoutes(app: FastifyInstance) {
     try {
       dayjs.extend(weekOfYear);
       const todayWeek = dayjs().week();
-      const [dbResponse] = await conn.query('SELECT id FROM `service_orders` WHERE `completed_at` = ?', [todayWeek]);
+const connection = await conn();
+      const [dbResponse] = await connection.query('SELECT id FROM `service_orders` WHERE `completed_at` = ?', [todayWeek]);
       let result = Object.values(JSON.parse(JSON.stringify(dbResponse)));
       var total = 0;
       result.forEach(() => {
@@ -163,7 +171,8 @@ export async function appRoutes(app: FastifyInstance) {
       });
       const { weekNumber } = getWeekParams.parse(request.query);
       const parsedWeekNumber = Number(weekNumber);
-      const [dbResponse] = await conn.query('SELECT id FROM `service_orders` WHERE `created_at` = ?', [parsedWeekNumber]);
+const connection = await conn()
+      const [dbResponse] = await connection.query('SELECT id FROM `service_orders` WHERE `created_at` = ?', [parsedWeekNumber]);
       let result = Object.values(JSON.parse(JSON.stringify(dbResponse)));
       var total = 0;
       result.forEach(() => {
@@ -184,7 +193,8 @@ export async function appRoutes(app: FastifyInstance) {
       });
       const { weekNumber } = getWeekParams.parse(request.query);
       const parsedWeekNumber = Number(weekNumber);
-      const [dbResponse] = await conn.query('SELECT id FROM `service_orders` WHERE `completed_at` = ?', [parsedWeekNumber]);
+const connection = await conn();
+      const [dbResponse] = await connection.query('SELECT id FROM `service_orders` WHERE `completed_at` = ?', [parsedWeekNumber]);
       let result = Object.values(JSON.parse(JSON.stringify(dbResponse)));
       var total = 0;
       result.forEach(() => {
@@ -215,8 +225,8 @@ app.post('/AssignOrderStep1', async (request, reply) => {
     dayjs.extend(customParseFormat);
     const osDateCorrect = dayjs(osDate).startOf('day').toDate();
 
-    
-    await conn.query('UPDATE `service_orders` SET `bu` = ?, `start_date` = ?, `planned_hours` = ?, `annotation` = ?, `assigned_workers_id` = ? WHERE `id` = ?',
+    const connection = await conn()
+    await connection.query('UPDATE `service_orders` SET `bu` = ?, `start_date` = ?, `planned_hours` = ?, `annotation` = ?, `assigned_workers_id` = ? WHERE `id` = ?',
       [osBu, osDateCorrect, osHours, osAnnotation, osWorkerId, osId]);
 
     reply.send('Order assigned successfully!');
@@ -248,15 +258,15 @@ app.post('/AssignOrderStep2', async (request, reply) => {
     const { osStatus, orderId, assignMode } = orderDetailsParsed.orderDetails[0];
     var updatedWorkerHours = 0;
 
-    
-    await conn.query('UPDATE `service_orders` SET `status` = ? WHERE `id` = ?', [osStatus, orderId]);
+    const connection = await conn();
+    await connection.query('UPDATE `service_orders` SET `status` = ? WHERE `id` = ?', [osStatus, orderId]);
 
     for (const element of orderDetailsParsed.orderDetails) {
       const startDateTime = dayjs(element.workerOsDate.concat(' ').concat(element.startHour)).format('YYYY-MM-DDTHH:mm:ss');
       const endDateTime = dayjs(element.workerOsDate.concat(' ').concat(element.endHour)).format('YYYY-MM-DDTHH:mm:ss');
 
       if (element.sequentialDays === 0) {
-        await conn.query('INSERT INTO assigned_os (worker_id, worker_name, worker_hours, start_date, end_date, order_id) VALUES (?, ?, ?, ?, ?, ?)',
+        await connection.query('INSERT INTO assigned_os (worker_id, worker_name, worker_hours, start_date, end_date, order_id) VALUES (?, ?, ?, ?, ?, ?)',
           [element.id, element.workerName, element.workerOsHours, startDateTime, endDateTime, element.orderId]);
       }
 
@@ -277,7 +287,7 @@ app.post('/AssignOrderStep2', async (request, reply) => {
           const startDateTimeSequential = dayjs(endDate.concat(' ').concat(element.startHour)).format('YYYY-MM-DDTHH:mm:ss');
           const endDateTimeSequential = dayjs(endDate.concat(' ').concat(element.endHour)).format('YYYY-MM-DDTHH:mm:ss');
 
-          await conn.query('INSERT INTO assigned_os (worker_id, worker_name, worker_hours, start_date, end_date, order_id) VALUES (?, ?, ?, ?, ?, ?)',
+          await connection.query('INSERT INTO assigned_os (worker_id, worker_name, worker_hours, start_date, end_date, order_id) VALUES (?, ?, ?, ?, ?, ?)',
             [element.id, element.workerName, updatedWorkerHours, startDateTimeSequential, endDateTimeSequential, element.orderId]);
         }
       }
@@ -293,8 +303,8 @@ app.post('/AssignOrderStep2', async (request, reply) => {
 // Route to get assigned orders
 app.get('/AssignedOrders', async (request, reply) => {
   try {
-    
-    const [dbResponse] = await conn.query('SELECT assigned_os.id, assigned_os.order_id, assigned_os.worker_name, assigned_os.worker_id, assigned_os.worker_hours, assigned_os.start_date, assigned_os.end_date, service_orders.costumer, service_orders.bu FROM assigned_os INNER JOIN service_orders ON assigned_os.order_id = service_orders.id');
+    const connection = await conn();
+    const [dbResponse] = await connection.query('SELECT assigned_os.id, assigned_os.order_id, assigned_os.worker_name, assigned_os.worker_id, assigned_os.worker_hours, assigned_os.start_date, assigned_os.end_date, service_orders.costumer, service_orders.bu FROM assigned_os INNER JOIN service_orders ON assigned_os.order_id = service_orders.id');
     reply.send(dbResponse);
   } catch (error) {
     console.error('Error fetching assigned orders:', error);
@@ -317,8 +327,8 @@ app.get('/osWorkers', async (request, reply) => {
       osWorkerId.push(worker)
     });
 
-    
-    const [dbResponse] = await conn.query('SELECT id, name, surname, photo FROM `users`');
+    const connection = await conn();
+    const [dbResponse] = await connection.query('SELECT id, name, surname, photo FROM `users`');
     const json = JSON.parse(JSON.stringify(dbResponse));
 
     const osWorker = json.reduce((result: Worker[], worker: Worker) => {
@@ -351,11 +361,11 @@ app.get('/osWorkersConcludeForm', async (request, reply) => {
     const { workerId, orderId } = reqParams.parse(request.query);
     const osWorkerId: number[] = JSON.parse(workerId);
 
-    
-    const [dbResponse] = await conn.query('SELECT id, name, surname, photo FROM `users`');
+    const connection = await conn()
+    const [dbResponse] = await connection.query('SELECT id, name, surname, photo FROM `users`');
     const json = JSON.parse(JSON.stringify(dbResponse));
 
-    const [dbResponse1] = await conn.query('SELECT worker_id, worker_hours FROM `assigned_os` WHERE `order_id` = ?', [orderId]);
+    const [dbResponse1] = await connection.query('SELECT worker_id, worker_hours FROM `assigned_os` WHERE `order_id` = ?', [orderId]);
     const json1 = JSON.parse(JSON.stringify(dbResponse1));
 
     const groupedData: GroupedData = json1.reduce((result: GroupedData, entry: WorkerData) => {
