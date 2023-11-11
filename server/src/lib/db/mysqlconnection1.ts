@@ -10,7 +10,10 @@ import mariadb from 'mariadb';
     password: 'Chiller@01'
   });
 
-  export const conn = pool.getConnection();
+  export const conn = async () => {
+    const connection = await pool.getConnection();
+    return connection;
+  };
  
   
   
