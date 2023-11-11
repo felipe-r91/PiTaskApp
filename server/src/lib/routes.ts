@@ -41,15 +41,15 @@ export async function appRoutes(app: FastifyInstance) {
   })
 
   app.get('/workers', async () => {
-    const [dbResponse] = await conn.execute('SELECT id, name, surname, role, email, photo, color FROM `users`');
+    const [dbResponse] = await conn.query('SELECT id, name, surname, role, email, photo, color FROM `users`');
     return dbResponse;
   })
   app.get('/AllOrders',async () => {
-    const [dbResponse] = await conn.execute('SELECT * FROM `service_orders`')
+    const [dbResponse] = await conn.query('SELECT * FROM `service_orders`')
     return dbResponse;
   })
   app.get('/NewOrders', async () => {
-    const [dbResponse] = await conn.execute('SELECT id FROM `service_orders` WHERE `status` = ?', ['new'],); 
+    const [dbResponse] = await conn.query('SELECT id FROM `service_orders` WHERE `status` = ?', ['new'],); 
     let result = Object.values(JSON.parse(JSON.stringify(dbResponse)));
     var total = 0;
     result.forEach(() =>{
@@ -59,7 +59,7 @@ export async function appRoutes(app: FastifyInstance) {
   })
 
   app.get('/UnassignedOrders', async () => {
-    const [dbResponse] = await conn.execute('SELECT * FROM `service_orders` WHERE `status` = ? OR `status` = ?' , ['new', 'unassigned'],); 
+    const [dbResponse] = await conn.query('SELECT * FROM `service_orders` WHERE `status` = ? OR `status` = ?' , ['new', 'unassigned'],); 
     return dbResponse;
   })
 
@@ -69,12 +69,12 @@ export async function appRoutes(app: FastifyInstance) {
     })
     const { orderId } = getOrderParam.parse(request.query)
     const parsedOrderId = Number(orderId)
-    const [dbResponse] = await conn.execute('SELECT id, title, costumer, description, annotation, planned_hours FROM `service_orders` WHERE `id` = ?', [parsedOrderId])
+    const [dbResponse] = await conn.query('SELECT id, title, costumer, description, annotation, planned_hours FROM `service_orders` WHERE `id` = ?', [parsedOrderId])
     return dbResponse;
   })
 
   app.get('/UnassignedOrdersCount', async () => {
-    const [dbResponse] = await conn.execute('SELECT id FROM `service_orders` WHERE `status` = ? OR `status` = ?', ['new', 'unassigned'],); 
+    const [dbResponse] = await conn.query('SELECT id FROM `service_orders` WHERE `status` = ? OR `status` = ?', ['new', 'unassigned'],); 
     let result = Object.values(JSON.parse(JSON.stringify(dbResponse)));
     var total = 0;
     result.forEach(() =>{
@@ -84,7 +84,7 @@ export async function appRoutes(app: FastifyInstance) {
   })
 
   app.get('/CompletedOrders', async () => {
-    const [dbResponse] = await conn.execute('SELECT id FROM `service_orders` WHERE `status` = ?', ['completed'],); 
+    const [dbResponse] = await conn.query('SELECT id FROM `service_orders` WHERE `status` = ?', ['completed'],); 
     let result = Object.values(JSON.parse(JSON.stringify(dbResponse)));
     var total = 0;
     result.forEach(() =>{
@@ -97,7 +97,7 @@ export async function appRoutes(app: FastifyInstance) {
     dayjs.extend(weekOfYear)
     const todayWeek = dayjs().week()
 
-    const [dbResponse] = await conn.execute('SELECT id FROM `service_orders` WHERE `completed_at` = ?', [todayWeek],); 
+    const [dbResponse] = await conn.query('SELECT id FROM `service_orders` WHERE `completed_at` = ?', [todayWeek],); 
     let result = Object.values(JSON.parse(JSON.stringify(dbResponse)));
     var total = 0;
     result.forEach(() =>{
@@ -114,7 +114,7 @@ export async function appRoutes(app: FastifyInstance) {
     const { weekNumber } = getWeekParams.parse(request.query)
     const parsedWeekNumber = Number(weekNumber)
 
-    const [dbResponse] = await conn.execute('SELECT id FROM `service_orders` WHERE `created_at` = ?', [parsedWeekNumber],); 
+    const [dbResponse] = await conn.query('SELECT id FROM `service_orders` WHERE `created_at` = ?', [parsedWeekNumber],); 
     let result = Object.values(JSON.parse(JSON.stringify(dbResponse)));
     var total = 0;
     result.forEach(() =>{
@@ -130,7 +130,7 @@ export async function appRoutes(app: FastifyInstance) {
     const { weekNumber } = getWeekParams.parse(request.query)
     const parsedWeekNumber = Number(weekNumber)
 
-    const [dbResponse] = await conn.execute('SELECT id FROM `service_orders` WHERE `completed_at` = ?', [parsedWeekNumber],); 
+    const [dbResponse] = await conn.query('SELECT id FROM `service_orders` WHERE `completed_at` = ?', [parsedWeekNumber],); 
     let result = Object.values(JSON.parse(JSON.stringify(dbResponse)));
     var total = 0;
     result.forEach(() =>{
@@ -158,7 +158,7 @@ export async function appRoutes(app: FastifyInstance) {
     dayjs.extend(customParseFormat)
     const osDateCorrect = dayjs(osDate).startOf('day').toDate()
 
-    await conn.execute('UPDATE `service_orders` SET `bu` = ?, `start_date` = ?, `planned_hours` = ?, `annotation` = ?, `assigned_workers_id` = ? WHERE `id` = ?', 
+    await conn.query('UPDATE `service_orders` SET `bu` = ?, `start_date` = ?, `planned_hours` = ?, `annotation` = ?, `assigned_workers_id` = ? WHERE `id` = ?', 
     [osBu, osDateCorrect, osHours, osAnnotation, osWorkerId, osId])
        
   })
@@ -183,14 +183,14 @@ export async function appRoutes(app: FastifyInstance) {
     const orderDetailsParsed = assignOrder.parse(request.body)  
     const { osStatus, orderId, assignMode } = orderDetailsParsed.orderDetails[0]
     var updatedWorkerHours = 0    
-    await conn.execute('UPDATE `service_orders` SET `status` = ? WHERE `id` = ?', [osStatus, orderId])
+    await conn.query('UPDATE `service_orders` SET `status` = ? WHERE `id` = ?', [osStatus, orderId])
 
     orderDetailsParsed.orderDetails.forEach(async (element) => {
       const startDateTime = dayjs(element.workerOsDate.concat(' ').concat(element.startHour)).format('YYYY-MM-DDTHH:mm:ss')
       const endDateTime = dayjs(element.workerOsDate.concat(' ').concat(element.endHour)).format('YYYY-MM-DDTHH:mm:ss')
 
       if(element.sequentialDays === 0){  
-        await conn.execute('INSERT INTO assigned_os (worker_id, worker_name, worker_hours, start_date, end_date, order_id) VALUES (?, ?, ?, ?, ?, ?)', [element.id, element.workerName, element.workerOsHours, startDateTime, endDateTime, element.orderId])
+        await conn.query('INSERT INTO assigned_os (worker_id, worker_name, worker_hours, start_date, end_date, order_id) VALUES (?, ?, ?, ?, ?, ?)', [element.id, element.workerName, element.workerOsHours, startDateTime, endDateTime, element.orderId])
       }
 
       if(element.sequentialDays != 0){
@@ -208,7 +208,7 @@ export async function appRoutes(app: FastifyInstance) {
           var startDateTimeSequential = dayjs(endDate.concat(' ').concat(element.startHour)).format('YYYY-MM-DDTHH:mm:ss')
           var endDateTimeSequential = dayjs(endDate.concat(' ').concat(element.endHour)).format('YYYY-MM-DDTHH:mm:ss')
 
-          await conn.execute('INSERT INTO assigned_os (worker_id, worker_name, worker_hours, start_date, end_date, order_id) VALUES (?, ?, ?, ?, ?, ?)', [element.id, element.workerName, updatedWorkerHours, startDateTimeSequential, endDateTimeSequential, element.orderId])
+          await conn.query('INSERT INTO assigned_os (worker_id, worker_name, worker_hours, start_date, end_date, order_id) VALUES (?, ?, ?, ?, ?, ?)', [element.id, element.workerName, updatedWorkerHours, startDateTimeSequential, endDateTimeSequential, element.orderId])
         }
       }
     })
@@ -217,7 +217,7 @@ export async function appRoutes(app: FastifyInstance) {
   })
 
   app.get('/AssignedOrders',async () => {
-    const [dbResponse] = await conn.execute('SELECT assigned_os.id, assigned_os.order_id, assigned_os.worker_name, assigned_os.worker_id, assigned_os.worker_hours, assigned_os.start_date, assigned_os.end_date, service_orders.costumer, service_orders.bu  FROM assigned_os INNER JOIN service_orders ON assigned_os.order_id = service_orders.id'); 
+    const [dbResponse] = await conn.query('SELECT assigned_os.id, assigned_os.order_id, assigned_os.worker_name, assigned_os.worker_id, assigned_os.worker_hours, assigned_os.start_date, assigned_os.end_date, service_orders.costumer, service_orders.bu  FROM assigned_os INNER JOIN service_orders ON assigned_os.order_id = service_orders.id'); 
     return dbResponse;
   })
 
@@ -234,7 +234,7 @@ export async function appRoutes(app: FastifyInstance) {
       worker = worker + 1
       osWorkerId.push(worker)
     });
-    const [dbResponse] = await conn.execute('SELECT id, name, surname, photo FROM `users`');
+    const [dbResponse] = await conn.query('SELECT id, name, surname, photo FROM `users`');
     var json = JSON.parse(JSON.stringify(dbResponse))
 
     const osWorker: Worker[] = []
@@ -265,10 +265,10 @@ export async function appRoutes(app: FastifyInstance) {
     const { orderId } = reqParams.parse(request.query)
     const osWorkerId : number[] = JSON.parse(workerId)
     
-    const [dbResponse] = await conn.execute('SELECT id, name, surname, photo FROM `users`');
+    const [dbResponse] = await conn.query('SELECT id, name, surname, photo FROM `users`');
     var json = JSON.parse(JSON.stringify(dbResponse))
 
-    const[dbResponse1] = await conn.execute('SELECT worker_id, worker_hours FROM `assigned_os` WHERE `order_id` = ?', [orderId])
+    const[dbResponse1] = await conn.query('SELECT worker_id, worker_hours FROM `assigned_os` WHERE `order_id` = ?', [orderId])
     var json1 = JSON.parse(JSON.stringify(dbResponse1))
     
     const groupedData: GroupedData = json1.reduce((result: GroupedData, entry: WorkerData) => {
