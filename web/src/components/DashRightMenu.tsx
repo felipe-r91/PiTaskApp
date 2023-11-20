@@ -1,7 +1,18 @@
 import { TbCalendarStats } from "react-icons/tb";
 import { OSButton } from "./OSButton";
+import { useEffect, useState } from "react";
+import { api } from "../lib/axios";
 
 export function DashRightMenu(){
+
+  const [todayOrders, setTodayOrders] = useState()
+
+  useEffect(() => {
+    api.get('/TodayAgenda').then(response =>{
+      setTodayOrders(response.data)
+    })
+  },[])
+
 
   return(
       <div className="bg-[#FBFAFF] w-96 flex flex-col px-10 gap-8">

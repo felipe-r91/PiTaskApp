@@ -55,13 +55,13 @@ export function Dashboard() {
   }, [])
 
   return (
-    <div className="flex">
-      <section className="w-full">
-        <div className=" bg-off-white flex flex-col items-center h-screen">
-          <div className="bg-off-white w-background-w h-fit pl-10 pt-8 pb-4 grid grid-cols-3">
-            <DashCard icon={TbStar} title={'Ordens Completas'} mainValue={completedOrders} svgStroke={'#5051F9'} kpiValue={completedOnWeek} kpiColor={'text-[#299702]'} link={'/Summary'} />
-            <DashCard icon={TbFileImport} title={'Novas Ordens'} mainValue={newOrders} svgStroke={'#1EA7FF'} kpiValue={newOrders} kpiColor={'text-[#1EA7FF]'} link={'/Summary '} />
-            <DashCard icon={TbFileReport} title={'Ordens sem Atribuição'} mainValue={ordersUnassignedCount} svgStroke={'#F52104'} kpiValue={newOrders} kpiColor={'text-[#F52104]'} link={'/Backlog'} />
+    <div className="flex h-[100vh]">
+      <section className="w-full flex bg-off-white">
+        <div>
+          <div className="flex gap-8 pt-10 pl-10 pb-5">
+            <DashCard icon={TbStar} title={'Ordens Completas'} mainValue={completedOrders} svgStroke={'#5051F9'} kpiValue={completedOnWeek} kpiColor={'text-[#299702]'} link={'/OsStatus'} />
+            <DashCard icon={TbFileImport} title={'Novas Ordens'} mainValue={newOrders} svgStroke={'#1EA7FF'} kpiValue={newOrders} kpiColor={'text-[#1EA7FF]'} link={'/OsStatus '} />
+            <DashCard icon={TbFileReport} title={'Ordens sem Atribuição'} mainValue={ordersUnassignedCount} svgStroke={'#F52104'} kpiValue={newOrders} kpiColor={'text-[#F52104]'} link={'/OsStatus'} />
           </div>
           <div className="bg-off-white w-background-w grid col-span-3 h-fit pl-10 pt-4">
             <div className="bg-white w-graphic-w h-graphic-h rounded-2xl">
@@ -73,7 +73,7 @@ export function Dashboard() {
                 <OrdersChart />
               </div>
             </div>
-            <div className=" max-h-[230px] overflow-y-auto overflow-x-hidden scrollbar-hide mt-8">
+            <div className=" max-h-[270px] overflow-y-auto overflow-x-hidden scrollbar-hide mt-8">
               {orders?.map((order) => (
                 <div
                   key={order.id}
@@ -84,7 +84,16 @@ export function Dashboard() {
             </div>
           </div>
         </div>
-            <div className="bg-off-white h-16"></div>
+        <div className="flex justify-center w-full">
+          <div className="pt-10">
+            <div>
+              <div className="bg-white rounded-xl h-[420px] w-[430px]"></div>
+            </div>
+            <div className="pt-10 pr-8">
+              <div className="bg-white rounded-xl h-[450px] w-[430px]"></div>
+            </div>
+          </div>
+        </div>
       </section>
       <DashRightMenu />
     </div>

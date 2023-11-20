@@ -4,6 +4,7 @@ import { api } from '../lib/axios';
 import { AvatarColab } from '../assets/AvatarColab';
 import { MdQueryBuilder } from 'react-icons/md';
 import { TbCircleMinus, TbCirclePlus, TbUser } from 'react-icons/tb';
+import dayjs from 'dayjs';
 
 
 interface FormProps {
@@ -21,6 +22,8 @@ type Workers = {
 export function ConcludeOSForm(props: FormProps) {
 
   const orderDetails = props.order
+  const [orderId] = useState(props.order?.id)
+  const dateTimeNow = dayjs().format('YYYY-MM-DD HH:mm:ss.SSS')
   const [workers, setWorkers] = useState<Workers>([])
   const totalWorkedHours: number[] = []
   const [lms, setLms] = useState<number[]>([0])
@@ -41,9 +44,13 @@ export function ConcludeOSForm(props: FormProps) {
   })
 
   function submitForm(e: FormEvent) {
-    e.preventDefault()
-    console.log(lms)
-
+    //e.preventDefault()
+    api.post('/ConcludeForm', {
+      orderId,
+      lms,
+      dateTimeNow,
+      totalWorkedHours
+    }).then(() => alert('Ordem concluída'))
   }
 
   function updateLmsValue(event: ChangeEvent<HTMLInputElement>, index: number) {
@@ -66,25 +73,13 @@ export function ConcludeOSForm(props: FormProps) {
         return 'bg-white border-[#e5e5ed] border-[1px] text-[#768396]'
     }
   }
-  //Render name for Bussines Unit
-  function buName() {
-    switch (orderDetails?.bu) {
-      case 'ER':
-        return 'Equipamentos Refrigeração';
-      case 'MI':
-        return 'Manutenção Industrial';
-      case 'MR':
-        return 'Manutenção Refrigeração';
-      case 'SB':
-        return 'Sem Unidade de Negócios'
-    }
-  }
+  
 
   return (
     <>
     <div className='absolute left-[430px] top-8'>
       <div className={`flex items-center justify-center w-fit h-fit rounded-md ${buColor()}`}>
-        <div className="text-[15px] leading-none pl-[10px] p-1.5 ">
+        <div className="text-[15px] leading-none pl-[7px] p-1.5 ">
           {orderDetails?.bu}
         </div>
       </div>
@@ -177,15 +172,15 @@ export function ConcludeOSForm(props: FormProps) {
           <div className='grid gap-3 max-h-[200px] overflow-auto scrollbar-hide py-1'>
             {lms.map((_input, index) => {
               return (
-                <>
-                  <div className='flex justify-center items-center gap-3'>
+                <div key={index}>
+                  <div className='flex justify-center items-center gap-3' >
                     {index === 0 &&
                       <TbCirclePlus
                         size={24} color='#8D98A9'
                         role='button'
                         onClick={() => setLms(prevData => [...prevData, 0])} />}
                     <input
-                      className="text-[#768396] shadow-[#E5E5ED] inline-flex h-[35px] max-w-[90px] flex-1 items-center pl-7 rounded-[9px] px-[10px] text-[15px]  shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px] focus:shadow-purple-light"
+                      className="text-[#768396] shadow-[#E5E5ED] inline-flex h-[35px] max-w-[90px] flex-1 items-center pl-3 rounded-[9px] px-[10px] text-[15px]  shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px] focus:shadow-purple-light"
                       required
                       type='number'
                       min={1}
@@ -204,7 +199,7 @@ export function ConcludeOSForm(props: FormProps) {
                     {lms.length === 1 &&
                       <div className='bg-white w-6'></div>}
                   </div>
-                </>
+                </div>
               );
             })}
           </div>

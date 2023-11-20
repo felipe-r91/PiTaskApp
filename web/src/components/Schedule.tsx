@@ -23,6 +23,7 @@ export type Orders = {
   worker_hours: number;
   start_date: string;
   end_date: string;
+  status: string;
   costumer: string;
   bu: string;
 }[]

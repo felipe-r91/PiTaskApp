@@ -61,6 +61,23 @@ export function Calendar( props : CalendarProps) {
     }
   }
 
+  function textColor(orderStatus: string){
+    switch(orderStatus){
+      default:
+        return ''
+      case 'concluded':
+        return '#bfbfbf'
+    }
+  }
+  function textAnnotation(orderStatus: string){
+    switch(orderStatus){
+      default:
+        return ''
+      case 'concluded':
+        return '\n\n\n\nCONCLUÍDA'
+    }
+  }
+
   props.workers?.map((worker) => {
     columnsData.push({name: worker.name, id: worker.id.toString()});
     images.push("./src/assets/uploads/"+ worker.photo)
@@ -127,7 +144,9 @@ const getImageForHeader = (args: any) => {
 
     const newEventsData = (props.orders || []).map((order) => ({
       id: order.id,
-      text: `OS - ${order.order_id}\n\n${order.costumer.substring(7, 50)}`,
+      fontColor: textColor(order.status),
+      backColor: '',
+      text: `OS - ${order.order_id}\n\n${order.costumer.substring(7, 50)} ${textAnnotation(order.status)}`,
       start: new DayPilot.Date(order.start_date).toString(),
       end: new DayPilot.Date(order.end_date).toString(),
       resource: order.worker_id.toString(),
