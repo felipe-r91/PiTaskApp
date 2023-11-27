@@ -82,6 +82,15 @@ export async function appRoutes(app: FastifyInstance) {
     })
     return total;
   })
+  app.get('/AssignedOrdersCount', async () => {
+    const [dbResponse] = await conn.execute('SELECT id FROM `service_orders` WHERE `status` = ?', ['assigned'],); 
+    let result = Object.values(JSON.parse(JSON.stringify(dbResponse)));
+    var total = 0;
+    result.forEach(() =>{
+      total ++;
+    })
+    return total;
+  })
 
   app.get('/CompletedOrders', async () => {
     const [dbResponse] = await conn.execute('SELECT id FROM `service_orders` WHERE `status` = ?', ['completed'],); 
@@ -315,7 +324,7 @@ export async function appRoutes(app: FastifyInstance) {
     }, 0)
     const workersCount = totalWorkedHours.length
     console.log(workersCount)    
-    await conn.execute('UPDATE `service_orders` SET `status` = ?, `lms` = ?, `end_date` = ?, `completed_at` = ?, `performed_hours` = ?, `workers_qnt` = ? WHERE `id` = ?', ['concluded', lms, dateTimeNow, completedWeek, perfomedHours, workersCount, orderId])
+    await conn.execute('UPDATE `service_orders` SET `status` = ?, `lms` = ?, `end_date` = ?, `completed_at` = ?, `performed_hours` = ?, `workers_qnt` = ? WHERE `id` = ?', ['completed', lms, dateTimeNow, completedWeek, perfomedHours, workersCount, orderId])
       
 
   })

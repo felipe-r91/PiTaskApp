@@ -10,7 +10,7 @@ async function main() {
   server.setSerializerCompiler(serializerCompiler)
 
   await server.register(appRoutes)
-  const address = await server.listen({ port: 3333, host: '192.168.1.9' });
+  const address = await server.listen({ port: 3333 });
   console.log(`Server is running on ${address}`);
   
 }

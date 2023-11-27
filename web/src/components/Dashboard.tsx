@@ -1,11 +1,13 @@
-import { TbFileImport, TbFileReport, TbStar } from "react-icons/tb";
+import { TbActivity, TbAlertTriangle, TbFileImport, TbFileReport, TbStar } from "react-icons/tb";
 import { DashCard } from "./DashCard";
 import { OrdersChart } from "./OrdersChart";
 import { Reminder } from "./Reminder";
 import { DashRightMenu } from "./DashRightMenu";
 import { api } from "../lib/axios";
 import { useEffect, useState } from "react";
-
+import dayjs from "dayjs";
+import weekOfYear from 'dayjs/plugin/weekOfYear';
+import { OsStatusChart } from "./OsStatusChart";
 
 
 type Orders = {
@@ -23,6 +25,9 @@ export function Dashboard() {
   const [newOrders, setNewOrders] = useState<number>(0)
   const [completedOrders, setCompletedOrders] = useState<number>(0)
   const [completedOnWeek, setCompletedOnWeek] = useState<number>(0)
+  const [assignedOrders, setAssignedOrders] = useState<number>(0)
+  dayjs.extend(weekOfYear)
+  const todayWeek = dayjs().week()
 
   useEffect(() => {
     api.get('/UnassignedOrders').then(response => {
@@ -51,6 +56,12 @@ export function Dashboard() {
   useEffect(() => {
     api.get('/CompletedOnWeek').then(response => {
       setCompletedOnWeek(response.data)
+    })
+  }, [])
+
+  useEffect(() => {
+    api.get('/AssignedOrdersCount').then(response => {
+      setAssignedOrders(response.data)
     })
   }, [])
 
@@ -87,10 +98,40 @@ export function Dashboard() {
         <div className="flex justify-center w-full">
           <div className="pt-10">
             <div>
-              <div className="bg-white rounded-xl h-[420px] w-[430px]"></div>
+              <div className="bg-white rounded-xl h-[280px] w-[430px]">
+                <div className="text-purple-dark font-bold text-xl pl-8 pt-6 flex gap-5 items-center">
+                  <div className="bg-dashboard-icon w-9 h-9 rounded-full justify-center items-center">
+                    <div className="p-1.5">
+                      <TbActivity size={24} color="#8D98A9" />
+                    </div>
+                  </div>
+                  <div>Status Totais</div>
+                </div>
+                <div className="pl-3 pt-3">
+                  <div className="bg-[#E8EDF1] h-line-h w-[400px]"></div>
+                </div>
+                <div className="flex justify-center pt-6">
+                  <OsStatusChart completedOrders={completedOrders} unassignedOrders={ordersUnassignedCount} assignedOrders={assignedOrders} />
+                </div>
+              </div>
             </div>
             <div className="pt-10 pr-8">
-              <div className="bg-white rounded-xl h-[450px] w-[430px]"></div>
+              <div className="bg-white rounded-xl h-[580px] w-[430px]">
+                <div className="text-purple-dark font-bold text-xl pl-8 pt-6 flex gap-5 items-center">
+                  <div className="bg-dashboard-icon w-9 h-9 rounded-full justify-center items-center">
+                    <div className="p-1.5">
+                      <TbAlertTriangle size={24} color="#8D98A9" />
+                    </div>
+                  </div>
+                  <div className="flex gap-7">
+                    <div>Finalizar nessa semana:</div>
+                    <div>{todayWeek}</div>
+                  </div>
+                </div>
+                <div className="pl-3 pt-3">
+                  <div className="bg-[#E8EDF1] h-line-h w-[400px]"></div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

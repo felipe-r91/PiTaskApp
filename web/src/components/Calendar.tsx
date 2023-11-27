@@ -65,7 +65,7 @@ export function Calendar( props : CalendarProps) {
     switch(orderStatus){
       default:
         return ''
-      case 'concluded':
+      case 'completed':
         return '#bfbfbf'
     }
   }
@@ -73,7 +73,7 @@ export function Calendar( props : CalendarProps) {
     switch(orderStatus){
       default:
         return ''
-      case 'concluded':
+      case 'completed':
         return '\n\n\n\nCONCLUÍDA'
     }
   }

@@ -74,7 +74,7 @@ export function OsCard(props: OsCard) {
             <Popover.Content
               className="rounded-lg border p-3 w-[100px] m-auto bg-white opacity-90 shadow-[0_10px_38px_-10px_hsla(206,22%,7%,.35),0_10px_20px_-15px_hsla(206,22%,7%,.2)] focus:shadow-[0_10px_38px_-10px_hsla(206,22%,7%,.35),0_10px_20px_-15px_hsla(206,22%,7%,.2)] will-change-[transform,opacity] data-[state=open]:data-[side=top]:animate-slideDownAndFade data-[state=open]:data-[side=right]:animate-slideLeftAndFade data-[state=open]:data-[side=bottom]:animate-slideUpAndFade data-[state=open]:data-[side=left]:animate-slideRightAndFade"
               sideOffset={0}>
-              {props.osStatus != 'concluded' && props.osStatus != 'new' && (
+              {props.osStatus != 'completed' && props.osStatus != 'new' && (
                 <Dialog.Root>
                   <Dialog.Trigger>
                     <div className='text-sm text-purple-light font-semibold px-4 pb-1'>
@@ -97,7 +97,7 @@ export function OsCard(props: OsCard) {
                   </Dialog.Portal>
                 </Dialog.Root>
               )}
-              {props.osStatus === 'concluded' &&
+              {props.osStatus === 'completed' &&
                 <Dialog.Root>
                   <Dialog.Trigger>
                     <div className='text-sm text-purple-light font-semibold px-2 pb-1 '>
@@ -208,7 +208,7 @@ export function OsCard(props: OsCard) {
             {props.osStatus === 'assigned' &&
               <TbCheckupList size={24} color="#F7B000" />
             }
-            {props.osStatus === 'concluded' &&
+            {props.osStatus === 'completed' &&
               <TbCheckbox size={24} color="#1ed760" />
             }
           </div>
