@@ -291,7 +291,7 @@ export function AssignOneOrderForm(props: FormProps) {
             </fieldset>
             <fieldset className="mb-[15px] grid justify-items-start gap-2">
               <label className="text-purple-dark text-right text-sm font-semibold" htmlFor="soObs">
-                Observação
+                Gestor da Atividade
               </label>
               <textarea
                 className="text-[#768396] shadow-[#E5E5ED] focus:shadow-purple-light inline-flex h-[145px] w-full flex-1 items-center justify-center rounded-[9px] px-[10px] py-2 text-[15px] leading-tight shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px] resize-none"

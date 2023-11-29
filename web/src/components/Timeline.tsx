@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { TbScreenShare } from "react-icons/tb";
 import { api } from "../lib/axios";
 import { TimelineScheduler } from "./TimelineScheduler";
-import { Workers }from "./Schedule"
-import { Orders }from "./Schedule"
+import { Workers } from "./Schedule"
+import { Orders } from "./Schedule"
 
 
 
@@ -15,14 +15,14 @@ export function Timeline() {
   useEffect(() => {
     api.get('/workers').then(response => {
       setAvailableWorkers(response.data)
-      
+
     })
   }, [])
 
   useEffect(() => {
     api.get('/AssignedOrders').then(response => {
       setAssignedOrders(response.data)
-     
+
     })
   }, [])
 
@@ -38,9 +38,7 @@ export function Timeline() {
               <TbScreenShare size={22} color='white' />
             </button>
           </div>
-          <div className="px-5 pt-2 min-w-fit">
-            <TimelineScheduler />
-          </div>
+          <TimelineScheduler workers={availableWorkers} orders={assignedOrders} />
         </div>
       </section>
     </div>
