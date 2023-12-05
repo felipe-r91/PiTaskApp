@@ -73,16 +73,16 @@ export function ConcludeOSForm(props: FormProps) {
         return 'bg-white border-[#e5e5ed] border-[1px] text-[#768396]'
     }
   }
-  
+
 
   return (
     <>
-    <div className='absolute left-[430px] top-8'>
-      <div className={`flex items-center justify-center w-fit h-fit rounded-md ${buColor()}`}>
-        <div className="text-[15px] leading-none pl-[7px] p-1.5 ">
-          {orderDetails?.bu}
+      <div className='absolute left-[430px] top-8'>
+        <div className={`flex items-center justify-center w-fit h-fit rounded-md ${buColor()}`}>
+          <div className="text-[15px] leading-none pl-[7px] p-1.5 ">
+            {orderDetails?.bu}
+          </div>
         </div>
-      </div>
       </div>
       <form onSubmit={submitForm} className='w-full grid grid-cols-3 pt-1 p-5 justify-center gap-[120px] transition ease-in-out duration-150'>
         <div className='w-[308px] pt-5'>
@@ -101,7 +101,7 @@ export function ConcludeOSForm(props: FormProps) {
             </div>
             <div
               className="text-[#768396] shadow-[#E5E5ED] focus:shadow-purple-light inline-flex h-[35px] w-full flex-1 items-center justify-start rounded-[9px] px-[10px] text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px] cursor-not-allowed">
-              {orderDetails?.title.substring(0, 34)}
+              {orderDetails?.title?.substring(0, 34)}
             </div>
           </div>
           <div className="mb-[15px] grid justify-items-start gap-2">
@@ -110,7 +110,7 @@ export function ConcludeOSForm(props: FormProps) {
             </div>
             <div
               className="text-[#768396] shadow-[#E5E5ED] focus:shadow-purple-light inline-flex h-[35px] w-full flex-1 items-center justify-start rounded-[9px] px-[10px] text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px] cursor-not-allowed">
-              {orderDetails?.costumer.substring(7, 50)}
+              {orderDetails?.costumer?.substring(7, 50)}
             </div>
           </div>
           <div className="mb-[15px] grid justify-items-start gap-2">
@@ -207,7 +207,8 @@ export function ConcludeOSForm(props: FormProps) {
         <button type='submit' className='w-24 h-9 flex justify-center items-center bg-[#EDECFE] text-base text-[#5051F9] hover:bg-[#5051F9] hover:text-white rounded-xl absolute right-12 bottom-7'>
           Salvar
         </button>
-      </form></>
+      </form>
+    </>
   )
 
 

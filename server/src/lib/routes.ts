@@ -226,7 +226,7 @@ export async function appRoutes(app: FastifyInstance) {
   })
 
   app.get('/AssignedOrders',async () => {
-    const [dbResponse] = await conn.execute('SELECT assigned_os.id, assigned_os.order_id, assigned_os.worker_name, assigned_os.worker_id, assigned_os.worker_hours, assigned_os.start_date, assigned_os.end_date, service_orders.status, service_orders.costumer, service_orders.bu  FROM assigned_os INNER JOIN service_orders ON assigned_os.order_id = service_orders.id'); 
+    const [dbResponse] = await conn.execute('SELECT assigned_os.id, assigned_os.order_id, assigned_os.worker_name, assigned_os.worker_id, assigned_os.worker_hours, assigned_os.start_date, assigned_os.end_date, service_orders.status, service_orders.costumer, service_orders.bu, service_orders.description, service_orders.assigned_workers_id, service_orders.title  FROM assigned_os INNER JOIN service_orders ON assigned_os.order_id = service_orders.id'); 
     return dbResponse;
   })
 
@@ -322,11 +322,8 @@ export async function appRoutes(app: FastifyInstance) {
     const perfomedHours = totalWorkedHours.reduce((acc, currValue) => {
       return acc += currValue;
     }, 0)
-    const workersCount = totalWorkedHours.length
-    console.log(workersCount)    
+    const workersCount = totalWorkedHours.length    
     await conn.execute('UPDATE `service_orders` SET `status` = ?, `lms` = ?, `end_date` = ?, `completed_at` = ?, `performed_hours` = ?, `workers_qnt` = ? WHERE `id` = ?', ['completed', lms, dateTimeNow, completedWeek, perfomedHours, workersCount, orderId])
-      
-
   })
 
   app.get('/TodayAgenda',async () => {

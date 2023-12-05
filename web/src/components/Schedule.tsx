@@ -26,6 +26,9 @@ export type Orders = {
   status: string;
   costumer: string;
   bu: string;
+  description: string;
+  assigned_workers_id: JSON;
+  title: string
 }[]
 
 

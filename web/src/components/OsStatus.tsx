@@ -20,20 +20,20 @@ type Orders = {
 }[]
 
 export type Order = {
-  id: number,
-  status: string,
-  title: string,
-  costumer: string,
-  description: string,
-  start_date: string,
-  end_date: string,
-  workers_qnt: number,
-  bu: string,
-  created_at: number,
-  completed_at: number,
-  annotation: number,
-  performed_hours: number,
-  assigned_workers_id: JSON
+  id?: number,
+  status?: string,
+  title?: string,
+  costumer?: string,
+  description?: string,
+  start_date?: string,
+  end_date?: string,
+  workers_qnt?: number,
+  bu?: string,
+  created_at?: number,
+  completed_at?: number,
+  annotation?: number,
+  performed_hours?: number,
+  assigned_workers_id?: JSON
 }
 
 export function OsStatus() {
