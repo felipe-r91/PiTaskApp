@@ -28,7 +28,8 @@ export type Orders = {
   bu: string;
   description: string;
   assigned_workers_id: JSON;
-  title: string
+  title: string;
+  planned_hours: number;
 }[]
 
 

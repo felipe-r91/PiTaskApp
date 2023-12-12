@@ -33,7 +33,9 @@ export type Order = {
   completed_at?: number,
   annotation?: number,
   performed_hours?: number,
-  assigned_workers_id?: JSON
+  planned_hours?: number,
+  assigned_workers_id?: JSON,
+  lms?: number
 }
 
 export function OsStatus() {

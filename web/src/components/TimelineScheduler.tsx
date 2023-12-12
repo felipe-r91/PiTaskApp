@@ -1,9 +1,13 @@
 import { useState, useEffect, useRef } from "react";
-import { DayPilot, DayPilotCalendar, DayPilotNavigator } from "@daypilot/daypilot-lite-react";
+import { DayPilot, DayPilotCalendar } from "@daypilot/daypilot-lite-react";
+import { Dialog, DialogClose, DialogContent, DialogOverlay, DialogPortal, DialogTitle } from "@radix-ui/react-dialog";
 import '../styles/timeline.css';
 import { Orders, Workers } from "./Schedule";
+import { Order } from "./Calendar";
 import { AvatarColab } from "../assets/AvatarColab";
+import { FiX } from 'react-icons/fi';
 import { TbChevronLeft, TbChevronRight } from "react-icons/tb";
+import { ConcludeOSForm } from "./ConcludeOSForm";
 
 
 interface TimetableEvent {
@@ -17,7 +21,8 @@ interface TimetableEvent {
   barColor: string,
   barBackColor: string,
   moveDisabled: boolean,
-  resizeDisabled: boolean
+  resizeDisabled: boolean,
+  tags: string
 }
 
 interface CustomDateRange {
@@ -33,11 +38,16 @@ interface Props {
 export function TimelineScheduler(props: Props) {
   const timetableRef = useRef<DayPilotCalendar>(null);
   const [events, setEvents] = useState<TimetableEvent[] | undefined>([]);
-  const [startDate, setStartDate] = useState<DayPilot.Date>(new DayPilot.Date())
+  const [startDateCalendar, setStartDateCalendar] = useState<DayPilot.Date>(new DayPilot.Date())
   const [scrollPosition, setScrollPosition] = useState(0);
   const [days, setDays] = useState<string[]>([]);
   const [viewType, setViewType] = useState('Week')
   const [headerDateFormat, setHeaderDateFormat] = useState('dddd d/M/yyyy')
+  const [isConcludeDialogOpen, setConcludeDialogOpen] = useState(false)
+  const [isVisualizeDialogOpen, setVisualizeDialogOpen] = useState(false)
+  const [isEditDialogOpen, setEditDialogOpen] = useState(false)
+  const [orderNumber, setOrderNumber] = useState(0)
+  const [orderToDisplay, setOrderToDisplay] = useState<Order>()
 
   useEffect(() => {
     const newEventsData = (props.orders || []).map((order) => {
@@ -53,8 +63,9 @@ export function TimelineScheduler(props: Props) {
         toolTip: toolTip(order.bu, order.start_date, order.end_date),
         barColor: buColor(order.bu),
         barBackColor: buBackColor(order.bu),
-        moveDisabled: false,
+        moveDisabled: checkMovePermission(order.status),
         resizeDisabled: true,
+        tags: order.status
       };
   
       if (dateRange) {
@@ -82,13 +93,8 @@ export function TimelineScheduler(props: Props) {
     const orderDate = new DayPilot.Date(orderStartDate);
     const baseDate = orderDate.getDatePart()
     const timeSlotDuration = 30; // Duration of each time slot in minutes
-  
     const startTime = baseDate.addMinutes((id - 1) * timeSlotDuration).toString();
-    const endTime = baseDate.addMinutes(id * timeSlotDuration).toString();
-  
-    // Adjust start and end times based on orderStartDate and orderEndDate if needed
-    // ...
-  
+    const endTime = baseDate.addMinutes(id * timeSlotDuration).toString();  
     return { startDate: startTime, endDate: endTime };
   }
   
@@ -171,12 +177,82 @@ export function TimelineScheduler(props: Props) {
     }
   }
 
+  function filterOrder(orderId: number) {
+    const foundOrder = props.orders?.find((order) => order.order_id === orderId);
+    if (foundOrder && foundOrder.order_id !== orderToDisplay?.order_id) {
+      setOrderToDisplay(foundOrder);
+    }
+  }
+
+  filterOrder(orderNumber)
+  
+  function checkMovePermission(status: string){
+    if (status === 'completed'){
+      return true
+    } else {
+      return false
+    }
+  }
+
+  const advanced = [{
+    text: 'Editar',
+    onClick: (args: any) => {
+      const textSource = args.source.text().substring(5, 15)
+      const orderNumber = Number(textSource.split('\u00A0')[0])
+      setOrderNumber(orderNumber)
+      setEditDialogOpen(true)
+      setStartDateCalendar(new DayPilot.Date(args.source.start()))
+    }
+  },
+  {
+    text: 'Visualizar',
+    onClick: (args: any) => {
+      const textSource = args.source.text().substring(5, 15)
+      const orderNumber = Number(textSource.split('\u00A0')[0])
+      setOrderNumber(orderNumber)
+      setVisualizeDialogOpen(true)
+      setStartDateCalendar(new DayPilot.Date(args.source.start()))
+    }
+  },
+  {
+    text: 'Concluir OS',
+    onClick: (args: any) => {
+      const textSource = args.source.text().substring(5, 15)
+      const orderNumber = Number(textSource.split('\u00A0')[0])
+      setOrderNumber(orderNumber)
+      setConcludeDialogOpen(true)
+      setStartDateCalendar(new DayPilot.Date(args.source.start()))
+    }
+  }
+  ]
+
+  const basic = [
+    {
+      text: 'Visualizar',
+      onClick: (args: any) => {
+        const textSource = args.source.text().substring(5, 15)
+        const orderNumber = Number(textSource.split('\n')[0])
+        setOrderNumber(orderNumber)
+        setVisualizeDialogOpen(true)
+        setStartDateCalendar(new DayPilot.Date(args.source.start()))
+      }
+    },
+  ]
+
+  const CalendarMenu = new DayPilot.Menu({
+    onShow: args => {
+      const event = args.source
+      args.menu.items = event.data.tags === 'completed' ? basic : advanced
+    },
+    hideOnMouseOut: true
+  })
+
   const config: DayPilot.CalendarConfig = {
     locale: 'pt-br',
     viewType: viewType,
     days: 15,
     theme: 'timeline',
-    startDate: startDate,
+    startDate: startDateCalendar,
     businessBeginsHour: 0,
     businessEndsHour: (availableWorkers() / 2),
     heightSpec: 'BusinessHoursNoScroll',
@@ -187,6 +263,7 @@ export function TimelineScheduler(props: Props) {
     durationBarVisible: true,
     headerDateFormat: headerDateFormat,
     events: [],
+    contextMenu: CalendarMenu,
 
     onBeforeHeaderRender: (args: any) => {
       const dayName = args.header.name
@@ -203,10 +280,10 @@ export function TimelineScheduler(props: Props) {
   
   function previousDate() {
     if(viewType === 'Week'){
-      setStartDate(startDate.addDays(-7))
+      setStartDateCalendar(startDateCalendar.addDays(-7))
       setDays([])
     } else {
-      setStartDate(startDate.addDays(-15))
+      setStartDateCalendar(startDateCalendar.addDays(-15))
       setDays([])
     }
     
@@ -214,10 +291,10 @@ export function TimelineScheduler(props: Props) {
 
   function nextDate() {
     if(viewType === 'Week'){
-      setStartDate(startDate.addDays(7))
+      setStartDateCalendar(startDateCalendar.addDays(7))
       setDays([])
     } else {
-      setStartDate(startDate.addDays(15))
+      setStartDateCalendar(startDateCalendar.addDays(15))
       setDays([])
     }
   }
@@ -232,7 +309,7 @@ export function TimelineScheduler(props: Props) {
                 <div className="font-semibold text-purple-dark text-base w-[60px]">
                   Semana
                 </div><div className="text-[#768396] shadow-[#E5E5ED]  inline-flex h-[35px] w-[20px] flex-1 items-center justify-center rounded-[9px] px-[20px] text-[15px]  shadow-[0_0_0_1px] outline-none">
-                  {startDate.weekNumber()}
+                  {startDateCalendar.weekNumber()}
                 </div>
               </div>
             </>
@@ -244,7 +321,7 @@ export function TimelineScheduler(props: Props) {
                   Mês
                 </div>
                 <div className="text-[#768396] shadow-[#E5E5ED]  inline-flex h-[35px] w-[20px] flex-1 items-center justify-center rounded-[9px] px-[20px] text-[15px]  shadow-[0_0_0_1px] outline-none">
-                  {startDate.getMonth() + 1}
+                  {startDateCalendar.getMonth() + 1}
                 </div>
               </div>
             </>
@@ -265,18 +342,18 @@ export function TimelineScheduler(props: Props) {
           </button>
         </div>
         <div className="flex gap-2 bg-[#edecfe] border border-[#E5E5ED] rounded-2xl">
-          <button type="button" onClick={() => {setViewType('Days'); setHeaderDateFormat('d/M/yyyy'); setStartDate(startDate.firstDayOfMonth())}} className={`w-fit h-[30px] rounded-2xl px-3  ${viewType === 'Days' ? 'bg-purple-light' : 'bg-[#edecfe]'} ${viewType === 'Days' ? 'text-white' : 'text-purple-dark'}  text-[14px] flex items-center justify-between`}>
+          <button type="button" onClick={() => {setViewType('Days'); setHeaderDateFormat('d/M/yyyy'); setStartDateCalendar(startDateCalendar.firstDayOfMonth())}} className={`w-fit h-[30px] rounded-2xl px-3  ${viewType === 'Days' ? 'bg-purple-light' : 'bg-[#edecfe]'} ${viewType === 'Days' ? 'text-white' : 'text-purple-dark'}  text-[14px] flex items-center justify-between`}>
             Quinzenal
           </button>
           <button type="button" onClick={() => {setViewType('Week'); setHeaderDateFormat('dddd d/M/yyyy')}} className={`w-fit h-[30px] rounded-2xl px-3  ${viewType === 'Week' ? 'bg-purple-light' : 'bg-[#edecfe]'} ${viewType === 'Week' ? 'text-white' : 'text-purple-dark'} text-[14px] flex items-center justify-between`}>
             Semanal
           </button>
         </div>
-        {startDate.getDatePart() !== new DayPilot.Date().getDatePart() &&
+        {startDateCalendar.getDatePart() !== new DayPilot.Date().getDatePart() &&
           <button
             className="w-16 h-9 flex justify-center items-center bg-[#EDECFE] text-base text-[#5051F9] hover:bg-[#5051F9] hover:text-white rounded-xl"
             type='button'
-            onClick={() => setStartDate(new DayPilot.Date())}>
+            onClick={() => setStartDateCalendar(new DayPilot.Date())}>
             Hoje
           </button>
         }
@@ -318,6 +395,54 @@ export function TimelineScheduler(props: Props) {
           </div>
         </div>
       </div>
+      <Dialog open={isConcludeDialogOpen}>
+        <DialogPortal>
+          <DialogOverlay className="bg-black opacity-60 data-[state=open]:animate-overlayShow fixed inset-0" />
+          <DialogContent className="data-[state=open]:animate-contentShow fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[1090px] translate-x-[-50%] translate-y-[-50%] rounded-[12px] p-6 bg-white shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] focus:outline-none">
+            <DialogTitle className="m-0 text-[30px] font-medium flex items-center gap-7">
+              Concluir Ordem de Serviço
+            </DialogTitle>
+            <DialogClose
+              onClick={() => { setConcludeDialogOpen(false) }}
+              className="absolute right-6 top-6 hover:bg-purple-100 rounded-full">
+              <FiX size={24} color='#5051F9' />
+            </DialogClose>
+            <ConcludeOSForm order={{ id: orderToDisplay?.order_id, bu: orderToDisplay?.bu, title: orderToDisplay?.title, description: orderToDisplay?.description, assigned_workers_id: orderToDisplay?.assigned_workers_id, costumer: orderToDisplay?.costumer, planned_hours: orderToDisplay?.planned_hours }} />
+          </DialogContent>
+        </DialogPortal>
+      </Dialog>
+      <Dialog open={isVisualizeDialogOpen}>
+        <DialogPortal>
+          <DialogOverlay className="bg-black opacity-60 data-[state=open]:animate-overlayShow fixed inset-0" />
+          <DialogContent className="data-[state=open]:animate-contentShow fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[1090px] translate-x-[-50%] translate-y-[-50%] rounded-[12px] p-6 bg-white shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] focus:outline-none">
+            <DialogTitle className="m-0 text-[30px] font-medium flex items-center gap-7">
+              Visualizar Ordem de Serviço
+            </DialogTitle>
+            <DialogClose
+              onClick={() => { setVisualizeDialogOpen(false) }}
+              className="absolute right-6 top-6 hover:bg-purple-100 rounded-full">
+              <FiX size={24} color='#5051F9' />
+            </DialogClose>
+            <div>To-do</div>
+          </DialogContent>
+        </DialogPortal>
+      </Dialog>
+      <Dialog open={isEditDialogOpen}>
+        <DialogPortal>
+          <DialogOverlay className="bg-black opacity-60 data-[state=open]:animate-overlayShow fixed inset-0" />
+          <DialogContent className="data-[state=open]:animate-contentShow fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[1090px] translate-x-[-50%] translate-y-[-50%] rounded-[12px] p-6 bg-white shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] focus:outline-none">
+            <DialogTitle className="m-0 text-[30px] font-medium flex items-center gap-7">
+              Editar Ordem de Serviço
+            </DialogTitle>
+            <DialogClose
+              onClick={() => { setEditDialogOpen(false) }}
+              className="absolute right-6 top-6 hover:bg-purple-100 rounded-full">
+              <FiX size={24} color='#5051F9' />
+            </DialogClose>
+            <div>To-do</div>
+          </DialogContent>
+        </DialogPortal>
+      </Dialog>
     </>
   );
 };

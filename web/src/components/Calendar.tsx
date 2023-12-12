@@ -13,7 +13,7 @@ interface CalendarProps {
   orders?: Orders
 }
 
-type Order = {
+export type Order = {
   id: number;
   order_id: number;
   worker_name: string;
@@ -27,6 +27,7 @@ type Order = {
   description: string;
   assigned_workers_id: JSON;
   title: string;
+  planned_hours: number;
 }
 
 export function Calendar(props: CalendarProps) {
@@ -41,7 +42,6 @@ export function Calendar(props: CalendarProps) {
   const [isConcludeDialogOpen, setConcludeDialogOpen] = useState(false)
   const [isVisualizeDialogOpen, setVisualizeDialogOpen] = useState(false)
   const [isEditDialogOpen, setEditDialogOpen] = useState(false)
-  const [dialogControl, setDialogControl] = useState('')
   const [orderNumber, setOrderNumber] = useState(0)
   const [orderToDisplay, setOrderToDisplay] = useState<Order>()
   const [startDateCalendar, setStartDateCalendar] = useState<DayPilot.Date>(new DayPilot.Date())
@@ -129,6 +129,14 @@ export function Calendar(props: CalendarProps) {
     }
     return "";
   };
+
+  function checkMovePermission(status: string){
+    if (status === 'completed'){
+      return true
+    } else {
+      return false
+    }
+  }
 
   const advanced = [{
     text: 'Editar',
@@ -250,7 +258,8 @@ export function Calendar(props: CalendarProps) {
       toolTip: toolTip(order.bu, order.start_date, order.end_date),
       barColor: buColor(order.bu),
       barBackColor: buBackColor(order.bu),
-      moveDisabled: false,
+      moveDisabled: checkMovePermission(order.status),
+      resizeDisabled: checkMovePermission(order.status),
       tags: order.status
     }));
 
@@ -310,7 +319,7 @@ export function Calendar(props: CalendarProps) {
               className="absolute right-6 top-6 hover:bg-purple-100 rounded-full">
               <FiX size={24} color='#5051F9' />
             </DialogClose>
-            <ConcludeOSForm order={{ id: orderToDisplay?.order_id, bu: orderToDisplay?.bu, title: orderToDisplay?.title, description: orderToDisplay?.description, assigned_workers_id: orderToDisplay?.assigned_workers_id, costumer: orderToDisplay?.costumer }} />
+            <ConcludeOSForm order={{ id: orderToDisplay?.order_id, bu: orderToDisplay?.bu, title: orderToDisplay?.title, description: orderToDisplay?.description, assigned_workers_id: orderToDisplay?.assigned_workers_id, costumer: orderToDisplay?.costumer, planned_hours:orderToDisplay?.planned_hours }} />
           </DialogContent>
         </DialogPortal>
       </Dialog>

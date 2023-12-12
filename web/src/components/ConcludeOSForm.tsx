@@ -2,9 +2,9 @@ import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
 import { Order } from './OsStatus'
 import { api } from '../lib/axios';
 import { AvatarColab } from '../assets/AvatarColab';
-import { MdQueryBuilder } from 'react-icons/md';
 import { TbCircleMinus, TbCirclePlus, TbUser } from 'react-icons/tb';
 import dayjs from 'dayjs';
+import { PlannedKPIChart } from './PlannedKPIChart';
 
 
 interface FormProps {
@@ -141,16 +141,28 @@ export function ConcludeOSForm(props: FormProps) {
               )}
             </div>
           </div>
-          <div className='pt-[40px] flex justify-center items-center gap-3 px-11'>
-            <div className='text-[14px] text-purple-dark font-bold'>
-              Total
+          <div className='pt-[40px] flex justify-between items-center'>
+            <div className='pl-3.5'>
+              <div className='flex justify-between items-center gap-3'>
+                <div className='text-[15px] text-purple-dark font-bold'>
+                  Executado
+                </div>
+                <div className="text-[#768396]">
+                  {totalWorkedHours.reduce((acc, currValue) => {
+                    return acc += currValue;
+                  }, 0)}h
+                </div>
+              </div>
+              <div className='pt-[10px] flex justify-between items-center gap-3'>
+                <div className='text-[15px] text-purple-dark font-bold'>
+                  Planejado
+                </div>
+                <div className="text-[#768396]">
+                  {orderDetails?.planned_hours}h
+                </div>
+              </div>
             </div>
-            <div className="text-[#768396] shadow-[#E5E5ED]  inline-flex h-[35px] w-[10px] flex-1 items-center justify-center rounded-[9px] px-[10px] text-[15px]  shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px] cursor-not-allowed">
-              {totalWorkedHours.reduce((acc, currValue) => {
-                return acc += currValue;
-              }, 0)}
-            </div>
-            <MdQueryBuilder size={24} color='#8D98A9' />
+            <PlannedKPIChart planned_hours={orderDetails?.planned_hours} performed_hours={totalWorkedHours} />
           </div>
         </div>
         <div className='w-[204px] pt-5 justify-center'>
@@ -163,7 +175,6 @@ export function ConcludeOSForm(props: FormProps) {
               {workers.length}
             </div>
             <div className='bg-white w-6'>
-
             </div>
           </div>
           <div className='text-purple-dark text-center text-sm font-semibold pb-2 pt-10'>
