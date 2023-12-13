@@ -19,7 +19,8 @@ export function PlannedKPIChart(props : ChartProps){
 
   function calculatePlannnedAccurancy(planned?: number, performed?: number){
     if(planned && performed){
-      setAcurrancy((planned/performed)*100)
+      const accuracy = (planned / performed) * 100;
+      setAcurrancy(Number(accuracy.toFixed(0)));
     }
   }
 

@@ -2,6 +2,7 @@ import { ChangeEvent, FormEvent, useEffect, useRef, useState } from "react";
 import { api } from "../lib/axios";
 import { AvatarColab } from "../assets/AvatarColab";
 import { TbArrowBackUp, TbCirclePlus } from "react-icons/tb";
+import { number } from "yup";
 
 
 
@@ -522,10 +523,10 @@ export function WorkersAssignHours(props: WorkerHoursProps) {
                     <div className="flex gap-14 items-center min-h-[71px]"
                       key={worker.id}
                     >
-                      <div className='w-[215px] h-[50px] rounded-[10px] shadow-custom bg-purple-light text-white flex pl-5 pr-16 items-center justify-between'>
+                      <div className='w-[215px] h-[50px] rounded-[10px] shadow-custom bg-purple-light text-white flex pl-5 items-center justify-between'>
                         <div className="flex items-center justify-around gap-6">
                           <AvatarColab width='w-[35px]' height='h-[35px]' img={worker.photo} name={worker.name} surname={worker.surname} />
-                          <div>{worker.name}</div>
+                          <div>{worker.name} {worker.surname}</div>
                         </div>
                       </div>
                       <fieldset className="pb-2 gap-5 w-[150px]">

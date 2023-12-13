@@ -329,6 +329,22 @@ export async function appRoutes(app: FastifyInstance) {
   app.get('/TodayAgenda',async () => {
     //to-do
   })
-}
 
+  app.post('/EditOrder',async (request) => {
+    const editOrder = z.object({
+      orderId: z.number(),
+      workersToDelete: z.number().array(),
+      workersIdToUpdate: z.number().array()
+    })
+
+    const updateOrder = editOrder.parse(request.body)
+    const { orderId, workersToDelete, workersIdToUpdate} = updateOrder
+    const assignedWorkersId = '['.concat(workersIdToUpdate.toString()).concat(']')
+    console.log(assignedWorkersId)
+    workersToDelete.forEach(async worker => {
+      await conn.execute('DELETE FROM `assigned_os` WHERE `worker_id` = ? AND `order_id` = ?', [worker, orderId])
+    })
+    await conn.execute('UPDATE `service_orders` SET `assigned_workers_id` = ? WHERE `id` = ?', [assignedWorkersId, orderId])
+  })
+}
 

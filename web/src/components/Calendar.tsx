@@ -8,6 +8,7 @@ import { Orders } from "./Schedule"
 import { FiX } from 'react-icons/fi';
 import { ConcludeOSForm } from './ConcludeOSForm';
 import { VisualizeOS } from './VisualizeOS';
+import { EditOS } from './EditOS';
 
 interface CalendarProps {
   workers?: Workers,
@@ -144,7 +145,7 @@ export function Calendar(props: CalendarProps) {
   }
 
   const advanced = [{
-    text: 'Editar',
+    text: 'Editar OS',
     onClick: (args: any) => {
       const textSource = args.source.text().substring(5, 15)
       const orderNumber = Number(textSource.split('\n')[0])
@@ -346,7 +347,7 @@ export function Calendar(props: CalendarProps) {
               className="absolute right-6 top-6 hover:bg-purple-100 rounded-full">
               <FiX size={24} color='#5051F9' />
             </DialogClose>
-            <div>To-do</div>
+            <EditOS order={{ id: orderToDisplay?.order_id, bu: orderToDisplay?.bu, title: orderToDisplay?.title, description: orderToDisplay?.description, assigned_workers_id: orderToDisplay?.assigned_workers_id, costumer: orderToDisplay?.costumer, planned_hours:orderToDisplay?.planned_hours }}/>
           </DialogContent>
         </DialogPortal>
       </Dialog>
