@@ -35,7 +35,7 @@ export type Order = {
   performed_hours?: number,
   planned_hours?: number,
   assigned_workers_id?: JSON,
-  lms?: number
+  lms?: number []
 }
 
 export function OsStatus() {

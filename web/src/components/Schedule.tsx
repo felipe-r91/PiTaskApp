@@ -30,6 +30,10 @@ export type Orders = {
   assigned_workers_id: JSON;
   title: string;
   planned_hours: number;
+  performed_hours: number;
+  lms: number [];
+  created_at: number;
+  completed_at: number;
 }[]
 
 

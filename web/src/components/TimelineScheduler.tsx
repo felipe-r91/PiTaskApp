@@ -197,9 +197,16 @@ export function TimelineScheduler(props: Props) {
   const advanced = [{
     text: 'Editar',
     onClick: (args: any) => {
-      const textSource = args.source.text().substring(5, 15)
-      const orderNumber = Number(textSource.split('\u00A0')[0])
-      setOrderNumber(orderNumber)
+      if (viewType === 'Week'){
+        const textSource = args.source.text().substring(5, 15)
+        const orderNumber = Number(textSource.split('\u00A0')[0])
+        setOrderNumber(orderNumber)
+      }
+      if (viewType === 'Days'){
+        const textSource = args.source.text().substring(3, 15)
+        const orderNumber = Number(textSource.split('\u00A0')[0])
+        setOrderNumber(orderNumber)
+      }
       setEditDialogOpen(true)
       setStartDateCalendar(new DayPilot.Date(args.source.start()))
     }
@@ -207,9 +214,16 @@ export function TimelineScheduler(props: Props) {
   {
     text: 'Visualizar',
     onClick: (args: any) => {
-      const textSource = args.source.text().substring(5, 15)
-      const orderNumber = Number(textSource.split('\u00A0')[0])
-      setOrderNumber(orderNumber)
+      if (viewType === 'Week'){
+        const textSource = args.source.text().substring(5, 15)
+        const orderNumber = Number(textSource.split('\u00A0')[0])
+        setOrderNumber(orderNumber)
+      }
+      if (viewType === 'Days'){
+        const textSource = args.source.text().substring(3, 15)
+        const orderNumber = Number(textSource.split('\u00A0')[0])
+        setOrderNumber(orderNumber)
+      }
       setVisualizeDialogOpen(true)
       setStartDateCalendar(new DayPilot.Date(args.source.start()))
     }
@@ -217,9 +231,16 @@ export function TimelineScheduler(props: Props) {
   {
     text: 'Concluir OS',
     onClick: (args: any) => {
-      const textSource = args.source.text().substring(5, 15)
-      const orderNumber = Number(textSource.split('\u00A0')[0])
-      setOrderNumber(orderNumber)
+      if (viewType === 'Week'){
+        const textSource = args.source.text().substring(5, 15)
+        const orderNumber = Number(textSource.split('\u00A0')[0])
+        setOrderNumber(orderNumber)
+      }
+      if (viewType === 'Days'){
+        const textSource = args.source.text().substring(3, 15)
+        const orderNumber = Number(textSource.split('\u00A0')[0])
+        setOrderNumber(orderNumber)
+      }
       setConcludeDialogOpen(true)
       setStartDateCalendar(new DayPilot.Date(args.source.start()))
     }
@@ -230,9 +251,16 @@ export function TimelineScheduler(props: Props) {
     {
       text: 'Visualizar',
       onClick: (args: any) => {
-        const textSource = args.source.text().substring(5, 15)
-        const orderNumber = Number(textSource.split('\n')[0])
-        setOrderNumber(orderNumber)
+        if (viewType === 'Week'){
+          const textSource = args.source.text().substring(5, 15)
+          const orderNumber = Number(textSource.split('\u00A0')[0])
+          setOrderNumber(orderNumber)
+        }
+        if (viewType === 'Days'){
+          const textSource = args.source.text().substring(3, 15)
+          const orderNumber = Number(textSource.split('\u00A0')[0])
+          setOrderNumber(orderNumber)
+        }
         setVisualizeDialogOpen(true)
         setStartDateCalendar(new DayPilot.Date(args.source.start()))
       }

@@ -226,7 +226,7 @@ export async function appRoutes(app: FastifyInstance) {
   })
 
   app.get('/AssignedOrders',async () => {
-    const [dbResponse] = await conn.execute('SELECT assigned_os.id, assigned_os.order_id, assigned_os.worker_name, assigned_os.worker_id, assigned_os.worker_hours, assigned_os.start_date, assigned_os.end_date, service_orders.status, service_orders.costumer, service_orders.bu, service_orders.description, service_orders.assigned_workers_id, service_orders.title, service_orders.planned_hours  FROM assigned_os INNER JOIN service_orders ON assigned_os.order_id = service_orders.id'); 
+    const [dbResponse] = await conn.execute('SELECT assigned_os.id, assigned_os.order_id, assigned_os.worker_name, assigned_os.worker_id, assigned_os.worker_hours, assigned_os.start_date, assigned_os.end_date, service_orders.status, service_orders.costumer, service_orders.bu, service_orders.description, service_orders.assigned_workers_id, service_orders.title, service_orders.planned_hours, service_orders.performed_hours, service_orders.lms, service_orders.created_at, service_orders.completed_at  FROM assigned_os INNER JOIN service_orders ON assigned_os.order_id = service_orders.id');
     return dbResponse;
   })
 
