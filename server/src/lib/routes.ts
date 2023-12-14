@@ -330,7 +330,7 @@ export async function appRoutes(app: FastifyInstance) {
     //to-do
   })
 
-  app.post('/EditOrder',async (request) => {
+  app.post('/EditOrderDelete',async (request) => {
     const editOrder = z.object({
       orderId: z.number(),
       workersToDelete: z.number().array(),
@@ -340,11 +340,29 @@ export async function appRoutes(app: FastifyInstance) {
     const updateOrder = editOrder.parse(request.body)
     const { orderId, workersToDelete, workersIdToUpdate} = updateOrder
     const assignedWorkersId = '['.concat(workersIdToUpdate.toString()).concat(']')
-    console.log(assignedWorkersId)
     workersToDelete.forEach(async worker => {
       await conn.execute('DELETE FROM `assigned_os` WHERE `worker_id` = ? AND `order_id` = ?', [worker, orderId])
     })
     await conn.execute('UPDATE `service_orders` SET `assigned_workers_id` = ? WHERE `id` = ?', [assignedWorkersId, orderId])
+  })
+
+  app.get('/AssignedWorkersForOS', async (request) =>{
+    const getWorkersId = z.object({
+      orderId: z.string()
+    })
+    const { orderId } = getWorkersId.parse(request.query)
+    const [dbResponse] = await conn.execute('SELECT `assigned_workers_id` FROM `service_orders` WHERE `id` = ?', [orderId])
+    return dbResponse;
+  })
+
+  app.post('/AddWorkerToOS',async (request) => {
+    const updateData = z.object({
+      orderId: z.number(),
+      workersId: z.number().array()
+    })
+
+    const { orderId, workersId } = updateData.parse(request.body) 
+    await conn.execute('UPDATE `service_orders` SET `assigned_workers_id` = ? WHERE `id` = ?', [workersId, orderId])
   })
 }
 

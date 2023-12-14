@@ -25,15 +25,15 @@ export function PlannedKPIChart(props : ChartProps){
   }
 
   function setGradientColors(acurrancy: number) {
-    if (90 <= acurrancy) {
+    if (96 <= acurrancy) {
       setColor1('#15eb4a') 
       setColor2('#0bebce')
     }
-    if (80 <= acurrancy && acurrancy <= 89) {
+    if (91 <= acurrancy && acurrancy <= 95) {
       setColor1('#20E647')
       setColor2('#87D4F9')
     }
-    if (70 <= acurrancy && acurrancy <= 79) {
+    if (70 <= acurrancy && acurrancy <= 90) {
       setColor1('#ebe815') 
       setColor2('#eb770b')
     }
