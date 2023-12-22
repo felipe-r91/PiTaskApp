@@ -364,5 +364,23 @@ export async function appRoutes(app: FastifyInstance) {
     const { orderId, workersId } = updateData.parse(request.body) 
     await conn.execute('UPDATE `service_orders` SET `assigned_workers_id` = ? WHERE `id` = ?', [workersId, orderId])
   })
+
+  app.post('/UpdateEventDate',async (request) => {
+    const updateEventDate = z.object({
+      eventId: z.string().optional(),
+      newEventDate: z.string(),
+      idToUpdate: z.number(),
+      nameToUpdate: z.string(),
+      workersAssignedId: z.number().array(),
+      orderId: z.number()
+    })
+
+    const { eventId, newEventDate, idToUpdate, nameToUpdate, workersAssignedId, orderId} = updateEventDate.parse(request.body)
+    const fixedDate = newEventDate.substring(0, 10)
+    const jsonIds = JSON.stringify(workersAssignedId)
+    const query = `UPDATE assigned_os SET worker_name = ?, worker_id = ?, start_date = CONCAT(?, 'T', SUBSTRING(start_date, 12)), end_date = CONCAT(?, 'T', SUBSTRING(end_date, 12)) WHERE id = ?`
+    await conn.execute(query, [nameToUpdate, idToUpdate, fixedDate, fixedDate, eventId])
+    await conn.execute('UPDATE `service_orders` SET `assigned_workers_id` = ? WHERE `id` = ?', [jsonIds, orderId])
+  })
 }
 

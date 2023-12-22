@@ -158,7 +158,8 @@ export function VisualizeOS(props: FormProps) {
               LMS
             </div>
             <div className='grid gap-3 max-h-[230px] h-[230px] overflow-auto scrollbar-hide py-1'>
-              {orderDetails?.lms?.map((lms, index) => {
+              {orderDetails?.status === 'completed' &&
+              orderDetails?.lms?.map((lms, index) => {
                 return (
                   <div key={index}>
                     <div className="flex justify-center items-center gap-3">
@@ -169,6 +170,13 @@ export function VisualizeOS(props: FormProps) {
                   </div>
                 );
               })}
+              {orderDetails?.status != 'completed' &&
+                <div className="flex justify-center items-start gap-3">
+                  <div className="text-[#768396] shadow-[#E5E5ED] inline-flex h-[35px] max-w-[90px] flex-1 items-center pl-3 rounded-[9px] px-[10px] text-[15px]  shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]">
+                    
+                  </div>
+                </div>
+              }
             </div>
           </div>
           <div className="pt-8 grid gap-3">
@@ -184,9 +192,16 @@ export function VisualizeOS(props: FormProps) {
               <div className="text-purple-dark text-[15px] font-semibold">
                 Finalizada:
               </div>
+              { orderDetails?.status === 'completed' &&
               <div className="text-[#768396]">
                 Semana {orderDetails?.completed_at}
               </div>
+              }
+              {orderDetails?.status != 'completed' &&
+                <div className="text-[#768396]">
+                Em aberto
+              </div>
+              }
             </div>
           </div>
         </div>

@@ -19,11 +19,15 @@ export function Timeline() {
     })
   }, [])
 
-  useEffect(() => {
+  function fetchAssignedOrders(){
     api.get('/AssignedOrders').then(response => {
       setAssignedOrders(response.data)
 
     })
+  }
+
+  useEffect(() => {
+    fetchAssignedOrders()
   }, [])
 
   return (
@@ -38,7 +42,7 @@ export function Timeline() {
               <TbScreenShare size={22} color='white' />
             </button>
           </div>
-          <TimelineScheduler workers={availableWorkers} orders={assignedOrders} />
+          <TimelineScheduler workers={availableWorkers} orders={assignedOrders} fetchAssignedOrders={fetchAssignedOrders}/>
         </div>
       </section>
     </div>

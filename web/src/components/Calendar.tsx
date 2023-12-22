@@ -155,6 +155,16 @@ export function Calendar(props: CalendarProps) {
     }
   },
   {
+    text: 'Visualizar',
+    onClick: (args: any) => {
+      const textSource = args.source.text().substring(5, 15)
+      const orderNumber = Number(textSource.split('\n')[0])
+      setOrderNumber(orderNumber)
+      setVisualizeDialogOpen(true)
+      setStartDateCalendar(new DayPilot.Date(args.source.start()))
+    }
+  },
+  {
     text: 'Concluir OS',
     onClick: (args: any) => {
       const textSource = args.source.text().substring(5, 15)
@@ -163,7 +173,8 @@ export function Calendar(props: CalendarProps) {
       setConcludeDialogOpen(true)
       setStartDateCalendar(new DayPilot.Date(args.source.start()))
     }
-  }
+  },
+
   ]
 
   const basic = [

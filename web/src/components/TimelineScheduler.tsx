@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, SetStateAction } from "react";
 import { DayPilot, DayPilotCalendar } from "@daypilot/daypilot-lite-react";
 import { Dialog, DialogClose, DialogContent, DialogOverlay, DialogPortal, DialogTitle } from "@radix-ui/react-dialog";
 import '../styles/timeline.css';
@@ -8,6 +8,9 @@ import { AvatarColab } from "../assets/AvatarColab";
 import { FiX } from 'react-icons/fi';
 import { TbChevronLeft, TbChevronRight } from "react-icons/tb";
 import { ConcludeOSForm } from "./ConcludeOSForm";
+import { VisualizeOS } from "./VisualizeOS";
+import { EditOS } from "./EditOS";
+import { api } from "../lib/axios";
 
 
 interface TimetableEvent {
@@ -33,6 +36,7 @@ interface CustomDateRange {
 interface Props {
   workers?: Workers
   orders?: Orders
+  fetchAssignedOrders: () => void
 }
 
 export function TimelineScheduler(props: Props) {
@@ -48,6 +52,10 @@ export function TimelineScheduler(props: Props) {
   const [isEditDialogOpen, setEditDialogOpen] = useState(false)
   const [orderNumber, setOrderNumber] = useState(0)
   const [orderToDisplay, setOrderToDisplay] = useState<Order>()
+  let workersAssignedId : number[] = []
+  let orderId: number
+  let idToUpdate : number
+  let nameToUpdate : string
 
   useEffect(() => {
     const newEventsData = (props.orders || []).map((order) => {
@@ -65,7 +73,7 @@ export function TimelineScheduler(props: Props) {
         barBackColor: buBackColor(order.bu),
         moveDisabled: checkMovePermission(order.status),
         resizeDisabled: true,
-        tags: order.status
+        tags: order.assigned_workers_id.toString()
       };
   
       if (dateRange) {
@@ -97,7 +105,27 @@ export function TimelineScheduler(props: Props) {
     const endTime = baseDate.addMinutes(id * timeSlotDuration).toString();  
     return { startDate: startTime, endDate: endTime };
   }
-  
+
+  function calcCustomWorkerId(customTime: string, prevIds: number[]){
+    let id: string | SetStateAction<number>
+    const orderDate = new DayPilot.Date(customTime)
+    const baseDate = orderDate.getTimePart()
+    const baseMilliseconds = 1800000
+    if(baseDate === 0){
+      id = 1
+    } else {
+      id = (baseDate / baseMilliseconds) + 1
+    }
+    idToUpdate = id
+    if(!prevIds.includes(id)){
+      prevIds.push(id)
+      workersAssignedId = prevIds
+    }
+    const worker = props.workers?.filter(worker => worker.id === id)
+    worker?.map(worker=> {
+      nameToUpdate = worker.name
+    })
+  } 
 
   function availableWorkers(): number {
     if (props.workers?.length === undefined) {
@@ -282,7 +310,7 @@ export function TimelineScheduler(props: Props) {
     theme: 'timeline',
     startDate: startDateCalendar,
     businessBeginsHour: 0,
-    businessEndsHour: (availableWorkers() / 2),
+    businessEndsHour: ((availableWorkers() / 2) + 1),
     heightSpec: 'BusinessHoursNoScroll',
     headerHeight: 60,
     hourWidth: 0,
@@ -299,6 +327,35 @@ export function TimelineScheduler(props: Props) {
         setDays(prevDays => [...prevDays, dayName])
       }
     },
+    onEventMove: (args: any) =>{
+     const eventDataTag = args.e.data.tags
+     const eventDataTagArray = eventDataTag.split(',')
+     workersAssignedId = eventDataTagArray.map(Number)
+     const eventText = args.e.data.text
+     if(viewType === 'Week'){
+      const textSource = eventText.substring(5, 15)
+      orderId = Number(textSource.split('\u00A0')[0])
+     }
+     if(viewType === 'Days'){
+      const textSource = eventText.substring(3, 15)
+      orderId = Number(textSource.split('\u00A0')[0])
+     }
+     
+    },
+    
+    onEventMoved: (args: any) => {
+      const eventId = args.e.data.id.toString()
+      const newEventDate = args.newStart.value
+      calcCustomWorkerId(args.newStart.value.toString(), workersAssignedId)
+      api.post('/UpdateEventDate', {
+        eventId,
+        newEventDate,
+        idToUpdate,
+        nameToUpdate,
+        workersAssignedId,
+        orderId
+      }).then(() => alert(`Atribuição modificada!`))
+    }
   };
 
   const handleScroll: React.UIEventHandler<HTMLDivElement> = (e) => {
@@ -311,7 +368,7 @@ export function TimelineScheduler(props: Props) {
       setStartDateCalendar(startDateCalendar.addDays(-7))
       setDays([])
     } else {
-      setStartDateCalendar(startDateCalendar.addDays(-15))
+      setStartDateCalendar(startDateCalendar.addDays(-1))
       setDays([])
     }
     
@@ -322,7 +379,7 @@ export function TimelineScheduler(props: Props) {
       setStartDateCalendar(startDateCalendar.addDays(7))
       setDays([])
     } else {
-      setStartDateCalendar(startDateCalendar.addDays(15))
+      setStartDateCalendar(startDateCalendar.addDays(1))
       setDays([])
     }
   }
@@ -370,10 +427,10 @@ export function TimelineScheduler(props: Props) {
           </button>
         </div>
         <div className="flex gap-2 bg-[#edecfe] border border-[#E5E5ED] rounded-2xl">
-          <button type="button" onClick={() => {setViewType('Days'); setHeaderDateFormat('d/M/yyyy'); setStartDateCalendar(startDateCalendar.firstDayOfMonth())}} className={`w-fit h-[30px] rounded-2xl px-3  ${viewType === 'Days' ? 'bg-purple-light' : 'bg-[#edecfe]'} ${viewType === 'Days' ? 'text-white' : 'text-purple-dark'}  text-[14px] flex items-center justify-between`}>
+          <button type="button" onClick={() => {setViewType('Days'); setHeaderDateFormat('d/M/yyyy'); props.fetchAssignedOrders(); setStartDateCalendar(startDateCalendar.firstDayOfMonth())}} className={`w-fit h-[30px] rounded-2xl px-3  ${viewType === 'Days' ? 'bg-purple-light' : 'bg-[#edecfe]'} ${viewType === 'Days' ? 'text-white' : 'text-purple-dark'}  text-[14px] flex items-center justify-between`}>
             Quinzenal
           </button>
-          <button type="button" onClick={() => {setViewType('Week'); setHeaderDateFormat('dddd d/M/yyyy')}} className={`w-fit h-[30px] rounded-2xl px-3  ${viewType === 'Week' ? 'bg-purple-light' : 'bg-[#edecfe]'} ${viewType === 'Week' ? 'text-white' : 'text-purple-dark'} text-[14px] flex items-center justify-between`}>
+          <button type="button" onClick={() => {setViewType('Week'); setHeaderDateFormat('dddd d/M/yyyy'); props.fetchAssignedOrders()}} className={`w-fit h-[30px] rounded-2xl px-3  ${viewType === 'Week' ? 'bg-purple-light' : 'bg-[#edecfe]'} ${viewType === 'Week' ? 'text-white' : 'text-purple-dark'} text-[14px] flex items-center justify-between`}>
             Semanal
           </button>
         </div>
@@ -451,7 +508,7 @@ export function TimelineScheduler(props: Props) {
               className="absolute right-6 top-6 hover:bg-purple-100 rounded-full">
               <FiX size={24} color='#5051F9' />
             </DialogClose>
-            <div>To-do</div>
+            <VisualizeOS order={{id: orderToDisplay?.order_id, bu: orderToDisplay?.bu, title: orderToDisplay?.title, description: orderToDisplay?.description, assigned_workers_id: orderToDisplay?.assigned_workers_id, costumer: orderToDisplay?.costumer, planned_hours:orderToDisplay?.planned_hours, lms: orderToDisplay?.lms, created_at: orderToDisplay?.created_at, completed_at: orderToDisplay?.completed_at}}/>
           </DialogContent>
         </DialogPortal>
       </Dialog>
@@ -467,7 +524,7 @@ export function TimelineScheduler(props: Props) {
               className="absolute right-6 top-6 hover:bg-purple-100 rounded-full">
               <FiX size={24} color='#5051F9' />
             </DialogClose>
-            <div>To-do</div>
+            <EditOS order={{ id: orderToDisplay?.order_id, bu: orderToDisplay?.bu, title: orderToDisplay?.title, description: orderToDisplay?.description, assigned_workers_id: orderToDisplay?.assigned_workers_id, costumer: orderToDisplay?.costumer, planned_hours:orderToDisplay?.planned_hours }}/>
           </DialogContent>
         </DialogPortal>
       </Dialog>

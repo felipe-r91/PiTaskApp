@@ -116,7 +116,7 @@ export function Dashboard() {
               </div>
             </div>
             <div className="pt-10 pr-8">
-              <div className="bg-white rounded-xl h-[580px] w-[430px]">
+              <div className="bg-white rounded-xl h-[280px] w-[430px]">
                 <div className="text-purple-dark font-bold text-xl pl-8 pt-6 flex gap-5 items-center">
                   <div className="bg-dashboard-icon w-9 h-9 rounded-full justify-center items-center">
                     <div className="p-1.5">
