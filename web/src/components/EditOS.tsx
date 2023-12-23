@@ -41,7 +41,6 @@ export function EditOS(props: FormProps) {
   useEffect(() => {
     api.get('/osWorkersConcludeForm', {
       params: {
-        workerId: JSON.stringify(orderDetails?.assigned_workers_id),
         orderId: orderDetails?.id
       }
     }).then(response => {

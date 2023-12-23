@@ -6,6 +6,7 @@ import dayjs from "dayjs";
 import weekOfYear from 'dayjs/plugin/weekOfYear';
 import { z } from "zod";
 import { conn } from './db/mysqlconnection';
+import { RowDataPacket } from "mysql2";
 var customParseFormat = require('dayjs/plugin/customParseFormat')
 
 interface Worker{
@@ -267,18 +268,18 @@ export async function appRoutes(app: FastifyInstance) {
 
   app.get('/osWorkersConcludeForm',async (request) => {
     const reqParams = z.object({
-      workerId: z.string(),
       orderId: z.string()
     })
-    const { workerId } = reqParams.parse(request.query)
-    const { orderId } = reqParams.parse(request.query)
-    const osWorkerId : number[] = JSON.parse(workerId)
-    
-    const [dbResponse] = await conn.execute('SELECT id, name, surname, photo FROM `users`');
-    var json = JSON.parse(JSON.stringify(dbResponse))
 
-    const[dbResponse1] = await conn.execute('SELECT worker_id, worker_hours FROM `assigned_os` WHERE `order_id` = ?', [orderId])
-    var json1 = JSON.parse(JSON.stringify(dbResponse1))
+    const { orderId } = reqParams.parse(request.query)
+
+    const [dbResponse] = await conn.execute('SELECT `assigned_workers_id` FROM `service_orders` WHERE `id` = ?', [orderId])
+    const [osWorkerId] = (dbResponse as RowDataPacket[]).map(row => row.assigned_workers_id);
+    const [dbResponse1] = await conn.execute('SELECT id, name, surname, photo FROM `users`');
+    var json = JSON.parse(JSON.stringify(dbResponse1))
+
+    const[dbResponse2] = await conn.execute('SELECT worker_id, worker_hours FROM `assigned_os` WHERE `order_id` = ?', [orderId])
+    var json1 = JSON.parse(JSON.stringify(dbResponse2))
     
     const groupedData: GroupedData = json1.reduce((result: GroupedData, entry: WorkerData) => {
       const { worker_id, worker_hours } = entry;
@@ -290,9 +291,9 @@ export async function appRoutes(app: FastifyInstance) {
     }, {});
         
     const osWorker: Worker[] = []
-    
+
     for(var i = 0; json.length > i; i++){
-      osWorkerId.forEach((worker) => {
+      osWorkerId.forEach((worker: any) => {
         if(worker === json[i].id){
           const workerOs = {
             id : json[i].id,
@@ -371,16 +372,18 @@ export async function appRoutes(app: FastifyInstance) {
       newEventDate: z.string(),
       idToUpdate: z.number(),
       nameToUpdate: z.string(),
-      workersAssignedId: z.number().array(),
       orderId: z.number()
     })
 
-    const { eventId, newEventDate, idToUpdate, nameToUpdate, workersAssignedId, orderId} = updateEventDate.parse(request.body)
+    const { eventId, newEventDate, idToUpdate, nameToUpdate, orderId} = updateEventDate.parse(request.body)
     const fixedDate = newEventDate.substring(0, 10)
-    const jsonIds = JSON.stringify(workersAssignedId)
     const query = `UPDATE assigned_os SET worker_name = ?, worker_id = ?, start_date = CONCAT(?, 'T', SUBSTRING(start_date, 12)), end_date = CONCAT(?, 'T', SUBSTRING(end_date, 12)) WHERE id = ?`
     await conn.execute(query, [nameToUpdate, idToUpdate, fixedDate, fixedDate, eventId])
-    await conn.execute('UPDATE `service_orders` SET `assigned_workers_id` = ? WHERE `id` = ?', [jsonIds, orderId])
+    const [dbResponse] = await conn.execute('SELECT DISTINCT worker_id FROM assigned_os WHERE order_id = ?', [orderId])
+    const workerIdsArray = (dbResponse as RowDataPacket[]).map(row => row.worker_id);
+    const jsonIds = JSON.stringify(workerIdsArray)
+    await conn.execute('UPDATE service_orders SET assigned_workers_id = ? WHERE id = ?', [jsonIds, orderId])
+    return jsonIds;
   })
 }
 

@@ -52,7 +52,6 @@ export function TimelineScheduler(props: Props) {
   const [isEditDialogOpen, setEditDialogOpen] = useState(false)
   const [orderNumber, setOrderNumber] = useState(0)
   const [orderToDisplay, setOrderToDisplay] = useState<Order>()
-  let workersAssignedId : number[] = []
   let orderId: number
   let idToUpdate : number
   let nameToUpdate : string
@@ -73,7 +72,7 @@ export function TimelineScheduler(props: Props) {
         barBackColor: buBackColor(order.bu),
         moveDisabled: checkMovePermission(order.status),
         resizeDisabled: true,
-        tags: order.assigned_workers_id.toString()
+        tags: order.order_id.toString()
       };
   
       if (dateRange) {
@@ -106,7 +105,7 @@ export function TimelineScheduler(props: Props) {
     return { startDate: startTime, endDate: endTime };
   }
 
-  function calcCustomWorkerId(customTime: string, prevIds: number[]){
+  function calcCustomWorkerId(customTime: string){
     let id: string | SetStateAction<number>
     const orderDate = new DayPilot.Date(customTime)
     const baseDate = orderDate.getTimePart()
@@ -117,10 +116,6 @@ export function TimelineScheduler(props: Props) {
       id = (baseDate / baseMilliseconds) + 1
     }
     idToUpdate = id
-    if(!prevIds.includes(id)){
-      prevIds.push(id)
-      workersAssignedId = prevIds
-    }
     const worker = props.workers?.filter(worker => worker.id === id)
     worker?.map(worker=> {
       nameToUpdate = worker.name
@@ -329,32 +324,20 @@ export function TimelineScheduler(props: Props) {
     },
     onEventMove: (args: any) =>{
      const eventDataTag = args.e.data.tags
-     const eventDataTagArray = eventDataTag.split(',')
-     workersAssignedId = eventDataTagArray.map(Number)
-     const eventText = args.e.data.text
-     if(viewType === 'Week'){
-      const textSource = eventText.substring(5, 15)
-      orderId = Number(textSource.split('\u00A0')[0])
-     }
-     if(viewType === 'Days'){
-      const textSource = eventText.substring(3, 15)
-      orderId = Number(textSource.split('\u00A0')[0])
-     }
-     
+     orderId = Number(eventDataTag)
     },
     
     onEventMoved: (args: any) => {
       const eventId = args.e.data.id.toString()
       const newEventDate = args.newStart.value
-      calcCustomWorkerId(args.newStart.value.toString(), workersAssignedId)
+      calcCustomWorkerId(args.newStart.value.toString())
       api.post('/UpdateEventDate', {
         eventId,
         newEventDate,
         idToUpdate,
         nameToUpdate,
-        workersAssignedId,
         orderId
-      }).then(() => alert(`Atribuição modificada!`))
+      }).then(() => alert('Atribuição atualizada!'))
     }
   };
 
@@ -368,7 +351,7 @@ export function TimelineScheduler(props: Props) {
       setStartDateCalendar(startDateCalendar.addDays(-7))
       setDays([])
     } else {
-      setStartDateCalendar(startDateCalendar.addDays(-1))
+      setStartDateCalendar(startDateCalendar.addDays(-15))
       setDays([])
     }
     
@@ -379,7 +362,7 @@ export function TimelineScheduler(props: Props) {
       setStartDateCalendar(startDateCalendar.addDays(7))
       setDays([])
     } else {
-      setStartDateCalendar(startDateCalendar.addDays(1))
+      setStartDateCalendar(startDateCalendar.addDays(15))
       setDays([])
     }
   }
@@ -492,7 +475,7 @@ export function TimelineScheduler(props: Props) {
               className="absolute right-6 top-6 hover:bg-purple-100 rounded-full">
               <FiX size={24} color='#5051F9' />
             </DialogClose>
-            <ConcludeOSForm order={{ id: orderToDisplay?.order_id, bu: orderToDisplay?.bu, title: orderToDisplay?.title, description: orderToDisplay?.description, assigned_workers_id: orderToDisplay?.assigned_workers_id, costumer: orderToDisplay?.costumer, planned_hours: orderToDisplay?.planned_hours }} />
+            <ConcludeOSForm order={{ id: orderToDisplay?.order_id, bu: orderToDisplay?.bu, title: orderToDisplay?.title, description: orderToDisplay?.description, costumer: orderToDisplay?.costumer, planned_hours: orderToDisplay?.planned_hours }} />
           </DialogContent>
         </DialogPortal>
       </Dialog>
@@ -508,7 +491,7 @@ export function TimelineScheduler(props: Props) {
               className="absolute right-6 top-6 hover:bg-purple-100 rounded-full">
               <FiX size={24} color='#5051F9' />
             </DialogClose>
-            <VisualizeOS order={{id: orderToDisplay?.order_id, bu: orderToDisplay?.bu, title: orderToDisplay?.title, description: orderToDisplay?.description, assigned_workers_id: orderToDisplay?.assigned_workers_id, costumer: orderToDisplay?.costumer, planned_hours:orderToDisplay?.planned_hours, lms: orderToDisplay?.lms, created_at: orderToDisplay?.created_at, completed_at: orderToDisplay?.completed_at}}/>
+            <VisualizeOS order={{id: orderToDisplay?.order_id, bu: orderToDisplay?.bu, title: orderToDisplay?.title, description: orderToDisplay?.description, costumer: orderToDisplay?.costumer, planned_hours:orderToDisplay?.planned_hours, lms: orderToDisplay?.lms, created_at: orderToDisplay?.created_at, completed_at: orderToDisplay?.completed_at}}/>
           </DialogContent>
         </DialogPortal>
       </Dialog>
@@ -524,7 +507,7 @@ export function TimelineScheduler(props: Props) {
               className="absolute right-6 top-6 hover:bg-purple-100 rounded-full">
               <FiX size={24} color='#5051F9' />
             </DialogClose>
-            <EditOS order={{ id: orderToDisplay?.order_id, bu: orderToDisplay?.bu, title: orderToDisplay?.title, description: orderToDisplay?.description, assigned_workers_id: orderToDisplay?.assigned_workers_id, costumer: orderToDisplay?.costumer, planned_hours:orderToDisplay?.planned_hours }}/>
+            <EditOS order={{ id: orderToDisplay?.order_id, bu: orderToDisplay?.bu, title: orderToDisplay?.title, description: orderToDisplay?.description, costumer: orderToDisplay?.costumer, planned_hours:orderToDisplay?.planned_hours }}/>
           </DialogContent>
         </DialogPortal>
       </Dialog>
