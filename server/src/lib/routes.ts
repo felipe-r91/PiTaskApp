@@ -366,7 +366,7 @@ export async function appRoutes(app: FastifyInstance) {
     await conn.execute('UPDATE `service_orders` SET `assigned_workers_id` = ? WHERE `id` = ?', [workersId, orderId])
   })
 
-  app.post('/UpdateEventDate',async (request) => {
+  app.post('/TimelineUpdateEventDate',async (request) => {
     const updateEventDate = z.object({
       eventId: z.string().optional(),
       newEventDate: z.string(),
@@ -383,7 +383,33 @@ export async function appRoutes(app: FastifyInstance) {
     const workerIdsArray = (dbResponse as RowDataPacket[]).map(row => row.worker_id);
     const jsonIds = JSON.stringify(workerIdsArray)
     await conn.execute('UPDATE service_orders SET assigned_workers_id = ? WHERE id = ?', [jsonIds, orderId])
-    return jsonIds;
+    
+  })
+
+  app.post('/CalendarEventMoved',async (request) => {
+    const updateEvent = z.object({
+      eventId: z.string(),
+      newEventStart: z.string(),
+      newEventEnd: z.string(),
+      resourceId: z.string(),
+      orderId: z.number()
+    })
+    const { eventId, newEventStart, newEventEnd, resourceId, orderId} = updateEvent.parse(request.body)
+    let workerName: string
+    const [dbWorkerName] = await conn.execute<RowDataPacket[]>('SELECT name FROM users WHERE id = ?',[resourceId])
+    if (dbWorkerName.length > 0) {
+      workerName = dbWorkerName[0].name;
+      
+    } else {
+      // Handle the case where the result array is empty
+      console.log('No worker found for the given ID');
+      workerName = ''
+    }
+    await conn.execute('UPDATE assigned_os SET worker_name = ?, worker_id = ?, start_date = ?, end_date = ? WHERE id = ?', [workerName, resourceId, newEventStart, newEventEnd, eventId])
+    const [dbResponse] = await conn.execute('SELECT DISTINCT worker_id FROM assigned_os WHERE order_id = ?', [orderId])
+    const workerIdsArray = (dbResponse as RowDataPacket[]).map(row => row.worker_id);
+    const jsonIds = JSON.stringify(workerIdsArray)
+    await conn.execute('UPDATE service_orders SET assigned_workers_id = ? WHERE id = ?', [jsonIds, orderId])
   })
 }
 

@@ -49,11 +49,15 @@ export function Schedule() {
     })
   }, [])
 
-  useEffect(() => {
+  function fetchAssignedOrders(){
     api.get('/AssignedOrders').then(response => {
       setAssignedOrders(response.data)
-     
+
     })
+  }
+
+  useEffect(() => {
+    fetchAssignedOrders()
   }, [])
   
   return (
@@ -90,7 +94,7 @@ export function Schedule() {
             </Dialog.Root>
           </div>
           <div className="px-5 pt-2 min-w-fit">
-            <Calendar workers={availableWorkers} orders={assignedOrders}/>
+            <Calendar workers={availableWorkers} orders={assignedOrders} fetchAssignedOrders={fetchAssignedOrders}/>
           </div>
         </div>
       </section>

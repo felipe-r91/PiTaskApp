@@ -331,7 +331,7 @@ export function TimelineScheduler(props: Props) {
       const eventId = args.e.data.id.toString()
       const newEventDate = args.newStart.value
       calcCustomWorkerId(args.newStart.value.toString())
-      api.post('/UpdateEventDate', {
+      api.post('/TimelineUpdateEventDate', {
         eventId,
         newEventDate,
         idToUpdate,
