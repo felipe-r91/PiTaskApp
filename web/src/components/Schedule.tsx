@@ -20,7 +20,7 @@ export type Orders = {
   order_id: number;
   worker_name: string;
   worker_id: number;
-  worker_hours: number;
+  worker_hours: string;
   start_date: string;
   end_date: string;
   status: string;

@@ -39,7 +39,7 @@ export function ConcludeOSForm(props: FormProps) {
   }, [orderDetails])
 
   workers.map((worker) => {
-    totalWorkedHours.push(worker.workedHours)
+    totalWorkedHours.push(Number(worker.workedHours))
   })
 
   function submitForm(e: FormEvent) {
@@ -122,7 +122,7 @@ export function ConcludeOSForm(props: FormProps) {
             </div>
           </div>
         </div>
-        <div className='w-[240px] pt-5 justify-center'>
+        <div className='w-[280px] pt-5 justify-center'>
           <div className="text-purple-dark text-center text-sm font-semibold pb-8">
             Tempo real de execução
           </div>
@@ -130,7 +130,7 @@ export function ConcludeOSForm(props: FormProps) {
             <div className='gap-2 grid'>
               {workers.map((worker) => <div
                 key={worker.id}
-                className='w-[215px] h-[40px] text-purple-dark flex items-center justify-between'>
+                className='w-[235px] h-[40px] text-purple-dark flex items-center justify-between'>
                 <div className="flex items-center justify-around gap-3">
                   <AvatarColab width='w-[35px]' height='h-[35px]' img={worker.photo} name={worker.name} surname={worker.surname} />
                   <div>{worker.name} {worker.surname}</div>

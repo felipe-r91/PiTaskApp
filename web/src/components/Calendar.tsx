@@ -22,7 +22,7 @@ export type Order = {
   order_id: number;
   worker_name: string;
   worker_id: number;
-  worker_hours: number;
+  worker_hours: string;
   start_date: string;
   end_date: string;
   status: string;
@@ -153,9 +153,9 @@ export function Calendar(props: CalendarProps) {
       onClick: (args: any) => {
         const textSource = args.source.text().substring(5, 15)
         const orderNumber = Number(textSource.split('\n')[0])
+        setStartDateCalendar(new DayPilot.Date(args.source.start()))
         setOrderNumber(orderNumber)
         setEditDialogOpen(true)
-        setStartDateCalendar(new DayPilot.Date(args.source.start()))
       }
     },
     {
@@ -163,9 +163,9 @@ export function Calendar(props: CalendarProps) {
       onClick: (args: any) => {
         const textSource = args.source.text().substring(5, 15)
         const orderNumber = Number(textSource.split('\n')[0])
+        setStartDateCalendar(new DayPilot.Date(args.source.start()))       
         setOrderNumber(orderNumber)
         setVisualizeDialogOpen(true)
-        setStartDateCalendar(new DayPilot.Date(args.source.start()))
       }
     },
     {
@@ -173,9 +173,9 @@ export function Calendar(props: CalendarProps) {
       onClick: (args: any) => {
         const textSource = args.source.text().substring(5, 15)
         const orderNumber = Number(textSource.split('\n')[0])
+        setStartDateCalendar(new DayPilot.Date(args.source.start()))
         setOrderNumber(orderNumber)
         setConcludeDialogOpen(true)
-        setStartDateCalendar(new DayPilot.Date(args.source.start()))
       }
     }
   ]
@@ -186,9 +186,9 @@ export function Calendar(props: CalendarProps) {
       onClick: (args: any) => {
         const textSource = args.source.text().substring(5, 15)
         const orderNumber = Number(textSource.split('\n')[0])
+        setStartDateCalendar(new DayPilot.Date(args.source.start()))
         setOrderNumber(orderNumber)
         setVisualizeDialogOpen(true)
-        setStartDateCalendar(new DayPilot.Date(args.source.start()))
       }
     },
   ]
@@ -196,7 +196,7 @@ export function Calendar(props: CalendarProps) {
   const CalendarMenu = new DayPilot.Menu({
     onShow: args => {
       const event = args.source
-      args.menu.items = event.data.tags === 'completed' ? basic : advanced
+      args.menu.items = event.data.tags[1] === 'completed' ? basic : advanced
     },
     hideOnMouseOut: true
   })
@@ -217,25 +217,35 @@ export function Calendar(props: CalendarProps) {
     theme: 'daypilotcalendar',
     allowEventOverlap: false,
     startDate: startDateCalendar,
-    cellHeight: 24.5,
+    cellHeight: 30,
     headerHeight: 150,
+    cellDuration: 60,
     businessBeginsHour: 7,
     businessEndsHour: 18,
     columns: [],
     events: [],
     contextMenu: CalendarMenu,
 
-
-    onEventResized: async () => {
-      alert('event resized')
+    onEventClicked:(args: any) => {
+      const startDate = args.e.start()
+      const endDate = args.e.end()
+      alert(`Event start: ${startDate.toString('d/M/yyyy HH:mm')}\nEvent end: ${endDate.toString('d/M/yyyy HH:mm')}`)
     },
 
-    onEventClicked: async () => {
-      alert('event clicked')
+    onEventResized: (args : any) => {
+      const eventId = args.e.data.id.toString()
+      const newEventStart = args.newStart.value
+      const newEventEnd = args.newEnd.value
+
+      api.post('/CalendarEventResized', {
+        eventId,
+        newEventStart,
+        newEventEnd
+      }).then(() => alert('Atribuição Atualizada!'))
     },
 
     onEventMove: (args: any) =>{
-      const eventDataTag = args.e.data.tags
+      const eventDataTag = args.e.data.tags[0]
       orderId = Number(eventDataTag)
     },
      onEventMoved:(args: any) => {
@@ -250,12 +260,7 @@ export function Calendar(props: CalendarProps) {
         resourceId,
         orderId
       }).then(() => alert('Atribuição atualizada!'));
-    },
-    onEventRightClick: () =>{
-      props.fetchAssignedOrders()
-    }
-    
-
+    }    
   });
 
   const calendarRef = useRef<DayPilotCalendar>(null);
@@ -283,12 +288,12 @@ export function Calendar(props: CalendarProps) {
       start: new DayPilot.Date(order.start_date).toString(),
       end: new DayPilot.Date(order.end_date).toString(),
       resource: order.worker_id.toString(),
-      toolTip: toolTip(order.bu, order.start_date, order.end_date),
+      toolTip: '',
       barColor: buColor(order.bu),
       barBackColor: buBackColor(order.bu),
       moveDisabled: checkMovePermission(order.status),
       resizeDisabled: checkMovePermission(order.status),
-      tags: order.order_id.toString()
+      tags: [order.order_id.toString(), order.status]
     }));
 
     setImages(newImages);
@@ -304,7 +309,7 @@ export function Calendar(props: CalendarProps) {
       ...configNav,
       startDate: startDateCalendar
     })
-  }, [props.workers, props.orders, isConcludeDialogOpen, isEditDialogOpen, isVisualizeDialogOpen]);
+  }, [props.orders, startDateCalendar, isConcludeDialogOpen, isEditDialogOpen, isVisualizeDialogOpen]);
 
   return (
     <>
@@ -343,7 +348,7 @@ export function Calendar(props: CalendarProps) {
             </DialogTitle>
             <DialogClose
               onClick={() => { setConcludeDialogOpen(false) }}
-              className="absolute right-6 top-6 hover:bg-purple-100 rounded-full">
+              className="absolute right-6 top-6 hover:bg-purple-100 rounded-full focus:outline-none">
               <FiX size={24} color='#5051F9' />
             </DialogClose>
             <ConcludeOSForm order={{ id: orderToDisplay?.order_id, bu: orderToDisplay?.bu, title: orderToDisplay?.title, description: orderToDisplay?.description, costumer: orderToDisplay?.costumer, planned_hours:orderToDisplay?.planned_hours }} />
@@ -362,7 +367,7 @@ export function Calendar(props: CalendarProps) {
               className="absolute right-6 top-6 hover:bg-purple-100 rounded-full">
               <FiX size={24} color='#5051F9' />
             </DialogClose>
-            <VisualizeOS order={{id: orderToDisplay?.order_id, bu: orderToDisplay?.bu, title: orderToDisplay?.title, description: orderToDisplay?.description, costumer: orderToDisplay?.costumer, planned_hours:orderToDisplay?.planned_hours, lms: orderToDisplay?.lms, created_at: orderToDisplay?.created_at, completed_at: orderToDisplay?.completed_at}}/>
+            <VisualizeOS order={{id: orderToDisplay?.order_id, bu: orderToDisplay?.bu, title: orderToDisplay?.title, description: orderToDisplay?.description, costumer: orderToDisplay?.costumer, planned_hours:orderToDisplay?.planned_hours, lms: orderToDisplay?.lms, created_at: orderToDisplay?.created_at, completed_at: orderToDisplay?.completed_at, status: orderToDisplay?.status}}/>
           </DialogContent>
         </DialogPortal>
       </Dialog>

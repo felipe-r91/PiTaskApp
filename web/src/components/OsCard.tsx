@@ -6,6 +6,8 @@ import { AssignOneOrderForm } from "./AssignOneOrderForm";
 import { Order } from './OsStatus';
 import { useState } from 'react';
 import { ConcludeOSForm } from './ConcludeOSForm';
+import { EditOS } from './EditOS';
+import { VisualizeOS } from './VisualizeOS';
 
 interface OsCard {
   soNumber: number,
@@ -92,7 +94,7 @@ export function OsCard(props: OsCard) {
                           <FiX size={24} color='#5051F9' />
                         </div>
                       </Dialog.Close>
-                     <div>To-do</div>
+                     <EditOS order={props.order}/>
                     </Dialog.Content>
                   </Dialog.Portal>
                 </Dialog.Root>
@@ -115,7 +117,7 @@ export function OsCard(props: OsCard) {
                           <FiX size={24} color='#5051F9' />
                         </div>
                       </Dialog.Close>
-                     <div>To-do</div>
+                     <VisualizeOS order={props.order}/>
                     </Dialog.Content>
                   </Dialog.Portal>
                 </Dialog.Root>

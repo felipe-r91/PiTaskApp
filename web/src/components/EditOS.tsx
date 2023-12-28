@@ -57,7 +57,7 @@ export function EditOS(props: FormProps) {
 
   workers.map((worker) => {
     if (worker.workedHours) {
-      totalWorkedHours.push(worker.workedHours)
+      totalWorkedHours.push(Number(worker.workedHours))
     }
     if (!workersIdToUpdate.includes(worker.id)) {
       setWorkersIdToUpdate(prevWorkers => [...prevWorkers, worker.id])

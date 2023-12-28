@@ -14,16 +14,16 @@ interface Worker{
   name: string,
   surname: string,
   photo: string,
-  workedHours?: number
+  workedHours?: string
 }
 
 interface WorkerData {
   worker_id: number;
-  worker_hours: number;
+  worker_hours: string;
 }
 
 interface GroupedData {
-  [worker_id: number]: number;
+  [worker_id: number]: string;
 }
 
 export async function appRoutes(app: FastifyInstance) {
@@ -266,40 +266,41 @@ export async function appRoutes(app: FastifyInstance) {
     
   })
 
-  app.get('/osWorkersConcludeForm',async (request) => {
+  app.get('/osWorkersConcludeForm', async (request) => {
     const reqParams = z.object({
       orderId: z.string()
     })
-
+  
     const { orderId } = reqParams.parse(request.query)
-
+  
     const [dbResponse] = await conn.execute('SELECT `assigned_workers_id` FROM `service_orders` WHERE `id` = ?', [orderId])
     const [osWorkerId] = (dbResponse as RowDataPacket[]).map(row => row.assigned_workers_id);
     const [dbResponse1] = await conn.execute('SELECT id, name, surname, photo FROM `users`');
-    var json = JSON.parse(JSON.stringify(dbResponse1))
-
-    const[dbResponse2] = await conn.execute('SELECT worker_id, worker_hours FROM `assigned_os` WHERE `order_id` = ?', [orderId])
-    var json1 = JSON.parse(JSON.stringify(dbResponse2))
-    
+    const json = JSON.parse(JSON.stringify(dbResponse1));
+  
+    const [dbResponse2] = await conn.execute('SELECT worker_id, worker_hours FROM `assigned_os` WHERE `order_id` = ?', [orderId])
+    const json1 = JSON.parse(JSON.stringify(dbResponse2));
+  
     const groupedData: GroupedData = json1.reduce((result: GroupedData, entry: WorkerData) => {
       const { worker_id, worker_hours } = entry;
       if (!result[worker_id]) {
-        result[worker_id] = 0;
+        result[worker_id] = '0.00';
       }
-      result[worker_id] += worker_hours;
+      // Treat worker_hours as a string when accumulating
+      result[worker_id] = (parseFloat(result[worker_id]) + parseFloat(worker_hours)).toFixed(2);
       return result;
     }, {});
-        
+  
     const osWorker: Worker[] = []
-
-    for(var i = 0; json.length > i; i++){
+  
+    for (let i = 0; json.length > i; i++) {
       osWorkerId.forEach((worker: any) => {
-        if(worker === json[i].id){
+        if (worker === json[i].id) {
           const workerOs = {
-            id : json[i].id,
-            name : json[i].name,
-            surname : json[i].surname,
-            photo : json[i].photo,
+            id: json[i].id,
+            name: json[i].name,
+            surname: json[i].surname,
+            photo: json[i].photo,
             workedHours: groupedData[worker]
           }
           osWorker.push(workerOs)
@@ -307,8 +308,9 @@ export async function appRoutes(app: FastifyInstance) {
       })
     }
     return osWorker;
-
   })
+  
+  
 
   app.post('/ConcludeForm',async (request) => {
     const concludeOrder = z.object({
@@ -410,6 +412,21 @@ export async function appRoutes(app: FastifyInstance) {
     const workerIdsArray = (dbResponse as RowDataPacket[]).map(row => row.worker_id);
     const jsonIds = JSON.stringify(workerIdsArray)
     await conn.execute('UPDATE service_orders SET assigned_workers_id = ? WHERE id = ?', [jsonIds, orderId])
+  })
+
+  app.post('/CalendarEventResized',async (request) => {
+    const updateEvent = z.object({
+      eventId: z.string(),
+      newEventStart: z.string(),
+      newEventEnd: z.string()
+    })
+
+    const { eventId, newEventStart, newEventEnd} = updateEvent.parse(request.body)
+    const startDate = dayjs(newEventStart)
+    const endDate = dayjs(newEventEnd)
+    const diff = endDate.diff(startDate)
+    const workHours = diff/3600000
+    await conn.execute('UPDATE assigned_os SET worker_hours = ?, start_date = ?, end_date = ? WHERE id = ?',[workHours,newEventStart, newEventEnd, eventId])
   })
 }
 

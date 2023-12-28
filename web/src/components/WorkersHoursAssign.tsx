@@ -2,6 +2,7 @@ import { ChangeEvent, FormEvent, useEffect, useRef, useState } from "react";
 import { api } from "../lib/axios";
 import { AvatarColab } from "../assets/AvatarColab";
 import { TbArrowBackUp, TbCirclePlus } from "react-icons/tb";
+import dayjs from "dayjs";
 
 
 
@@ -172,6 +173,7 @@ export function WorkersAssignHours(props: WorkerHoursProps) {
   //Submit Form with workers atribuittion
   function SubmitForm(event: FormEvent) {
     //Check is the use is not Editing the OS
+    event.preventDefault()
     if (!props.isEditingOS){
       //Structure to post data
       if (formState.availableHours >= 0) {
@@ -188,10 +190,10 @@ export function WorkersAssignHours(props: WorkerHoursProps) {
           assignMode: formState.assignMode 
         }));
         //Post and feedback alert
-        api.post('/AssignOrderStep2', {
+        /*api.post('/AssignOrderStep2', {
           orderDetails
-        }).then(() => alert("Ordem atribuída com sucesso!"))
-        
+        }).then(() => alert("Ordem atribuída com sucesso!"))*/
+        console.log(orderDetails)
   
       }
       //Alert user for error on total hours assigned
@@ -311,26 +313,36 @@ export function WorkersAssignHours(props: WorkerHoursProps) {
     if (isSeqDay) {
       selectedSeqDay = Number(event?.target.value);
     }
-  
-    setWorkersData((prevWorkersData) =>
-      prevWorkersData.map((worker) => ({
-        ...worker,
-        workerOsHours: ((Number(worker.endHour.substring(0, 2))) - (Number(worker.startHour.substring(0, 2)))),
-      }))
-    );
-  
+
     setWorkersData((prevWorkersData) => {
-      const updatedWorkersData = prevWorkersData;
-      const worker = updatedWorkersData[0];
-  
-      // Calculate total available hours for allocation based on user input fields
-      var diff = ((Number(worker.endHour.substring(0, 2)) - Number(worker.startHour.substring(0, 2))) * factor * selectedSeqDay);
-  
-      totalAssignedHours = diff;
-        setFormState({ ...formState, availableHours: (getOsHours() - totalAssignedHours) });
+      const startDate = dayjs(prevWorkersData[0].osDate.concat(' ' + prevWorkersData[0].startHour))
+      const endDate = dayjs(prevWorkersData[0].osDate.concat(' ' + prevWorkersData[0].endHour))
+      const diff = endDate.diff(startDate)
+      let lunch: number
+
+      if(Number(prevWorkersData[0].endHour.substring(0, 2)) >= 13){
+        lunch = 4800000
+      } else {
+        lunch = 0
+      }
+
+      const updatedWorkersData = prevWorkersData
+      //const worker = updatedWorkersData[0]
+      var diff1 = (((diff - lunch) / 3600000) * selectedSeqDay * factor)
+      var diff2 = (((diff - lunch) / 3600000) * selectedSeqDay)
+      setWorkersData((prevWorkersData) => 
+        prevWorkersData.map((worker) => ({
+          ...worker,
+          workerOsHours: diff2
+        }))
+      )
+
+      totalAssignedHours = diff1
+      setFormState({ ...formState, availableHours: (getOsHours() - totalAssignedHours)})
+
       return updatedWorkersData;
 
-    });
+    })
   }
 
   //Individual atribuittion functions, the same logic than the Team atribuittion but updating info indivudually
@@ -399,12 +411,23 @@ export function WorkersAssignHours(props: WorkerHoursProps) {
     }
   
     setWorkersData((prevWorkerData) => {
+      const startDate = dayjs(prevWorkerData[index].osDate.concat(' ' + prevWorkerData[index].startHour))
+      const endDate = dayjs(prevWorkerData[index].osDate.concat(' ' + prevWorkerData[index].endHour))
+      const diff = endDate.diff(startDate)
+      let lunch: number
+  
+      if (Number(prevWorkerData[index].endHour.substring(0, 2)) >= 13) {
+        lunch = 4800000
+      } else {
+        lunch = 0
+      }
+  
       const updatedWorkersData = prevWorkerData.map((worker, i) =>
-        i === index ? { ...worker, workerOsHours: ((Number(worker.endHour.substring(0, 2))) - (Number(worker.startHour.substring(0, 2)))) * selectedSeqDay } : worker
+        i === index ? { ...worker, workerOsHours: ((diff - lunch) / 3600000) * selectedSeqDay } : worker
       );
   
       const totalAssignedHours = updatedWorkersData.reduce((total, worker) => total + worker.workerOsHours, 0);
-  
+      console.log(diff)
       setFormState((prevFormState) => ({
         ...prevFormState,
         availableHours: getOsHours() - totalAssignedHours,
@@ -413,6 +436,7 @@ export function WorkersAssignHours(props: WorkerHoursProps) {
       return updatedWorkersData; // Return the updated state
     });
   }
+  
 
   
   //Update array of data and render individual inputs for one worker
@@ -468,8 +492,8 @@ export function WorkersAssignHours(props: WorkerHoursProps) {
               <div className="text-purple-dark font-bold flex items-center gap-3">
                 Horas para alocar
                 {showAvailableHours ?
-                  <div className={`text-[#768396] shadow-[#E5E5ED] focus:shadow-purple-light inline-flex h-[30px] w-[10px] flex-1 items-center justify-center rounded-[4px] px-[20px] text-[15px] leading-tight shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px] ${formState.availableHours < 0 ? 'bg-[#fd3c30] text-white' : ''} ${formState.availableHours === 0 ? 'bg-[#41D37E] text-white' : ''}`}>
-                    {formState.availableHours}
+                  <div className={`text-[#768396] shadow-[#E5E5ED] focus:shadow-purple-light inline-flex h-[30px] w-[10px] flex-1 items-center justify-center rounded-[4px] px-[25px] text-[15px] leading-tight shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px] ${formState.availableHours < 0 ? 'bg-[#fd3c30] text-white' : ''} ${formState.availableHours === 0 ? 'bg-[#41D37E] text-white' : ''}`}>
+                    {formState.availableHours.toFixed(2)}
                   </div>
                   : <div className="flex"><img src="/src/assets/ring-resize.svg" alt="..." width={20} /></div>}
               </div>
@@ -613,11 +637,10 @@ export function WorkersAssignHours(props: WorkerHoursProps) {
                         </label>
                         <input
                           type="time"
-                          min={props.osDate}
+                          //min={props.osDate}
                           className="text-[#768396] shadow-[#E5E5ED] focus:shadow-purple-light inline-flex h-[35px] w-[100px] flex-1 items-center justify-center rounded-[9px] px-[10px] py-2 text-[15px] leading-tight shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
                           required
                           onChange={e => { handleStartHourSelection(e, index); handleHourSum(index, false); setShowAvailableHours(false) }}
-                          value={worker.startHour}
                         />
                       </fieldset>
                       <fieldset className="pb-2 gap-5 w-fit">
@@ -626,11 +649,11 @@ export function WorkersAssignHours(props: WorkerHoursProps) {
                         </label>
                         <input
                           type="time"
-                          min={props.osDate}
+                          //min={props.osDate}
                           className="text-[#768396] shadow-[#E5E5ED] focus:shadow-purple-light inline-flex h-[35px] w-[100px] flex-1 items-center justify-center rounded-[9px] px-[10px] py-2 text-[15px] leading-tight shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
                           required
                           onChange={e => { handleEndHourSelection(e, index); handleHourSum(index, false); setShowAvailableHours(true) }}
-                          value={worker.endHour}
+                          autoComplete="false"
                         />
                       </fieldset>
                       <div>

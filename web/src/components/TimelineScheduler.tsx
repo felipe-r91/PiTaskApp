@@ -25,7 +25,7 @@ interface TimetableEvent {
   barBackColor: string,
   moveDisabled: boolean,
   resizeDisabled: boolean,
-  tags: string
+  tags: string[]
 }
 
 interface CustomDateRange {
@@ -72,7 +72,7 @@ export function TimelineScheduler(props: Props) {
         barBackColor: buBackColor(order.bu),
         moveDisabled: checkMovePermission(order.status),
         resizeDisabled: true,
-        tags: order.order_id.toString()
+        tags: [order.order_id.toString(), order.status]
       };
   
       if (dateRange) {
@@ -286,6 +286,7 @@ export function TimelineScheduler(props: Props) {
         }
         setVisualizeDialogOpen(true)
         setStartDateCalendar(new DayPilot.Date(args.source.start()))
+        console.log(orderToDisplay)
       }
     },
   ]
@@ -293,7 +294,7 @@ export function TimelineScheduler(props: Props) {
   const CalendarMenu = new DayPilot.Menu({
     onShow: args => {
       const event = args.source
-      args.menu.items = event.data.tags === 'completed' ? basic : advanced
+      args.menu.items = event.data.tags[1] === 'completed' ? basic : advanced
     },
     hideOnMouseOut: true
   })
@@ -323,7 +324,7 @@ export function TimelineScheduler(props: Props) {
       }
     },
     onEventMove: (args: any) =>{
-     const eventDataTag = args.e.data.tags
+     const eventDataTag = args.e.data.tags[0]
      orderId = Number(eventDataTag)
     },
     
@@ -491,7 +492,7 @@ export function TimelineScheduler(props: Props) {
               className="absolute right-6 top-6 hover:bg-purple-100 rounded-full">
               <FiX size={24} color='#5051F9' />
             </DialogClose>
-            <VisualizeOS order={{id: orderToDisplay?.order_id, bu: orderToDisplay?.bu, title: orderToDisplay?.title, description: orderToDisplay?.description, costumer: orderToDisplay?.costumer, planned_hours:orderToDisplay?.planned_hours, lms: orderToDisplay?.lms, created_at: orderToDisplay?.created_at, completed_at: orderToDisplay?.completed_at}}/>
+            <VisualizeOS order={{id: orderToDisplay?.order_id, bu: orderToDisplay?.bu, title: orderToDisplay?.title, description: orderToDisplay?.description, costumer: orderToDisplay?.costumer, planned_hours:orderToDisplay?.planned_hours, lms: orderToDisplay?.lms, created_at: orderToDisplay?.created_at, completed_at: orderToDisplay?.completed_at, status: orderToDisplay?.status}}/>
           </DialogContent>
         </DialogPortal>
       </Dialog>

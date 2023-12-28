@@ -34,7 +34,7 @@ export function VisualizeOS(props: FormProps) {
   }, [orderDetails])
 
   workers.map((worker) => {
-    totalWorkedHours.push(worker.workedHours)
+    totalWorkedHours.push(Number(worker.workedHours))
   })
 
   function buColor() {
@@ -59,7 +59,7 @@ export function VisualizeOS(props: FormProps) {
           </div>
         </div>
       </div>
-      <div className='w-full grid grid-cols-3 pt-1 p-5 justify-center gap-[120px] transition ease-in-out duration-150'>
+      <div className='w-full grid grid-cols-3 pt-1 p-5 justify-center gap-[100px] transition ease-in-out duration-150'>
         <div className='w-[308px] pt-5'>
           <div className="mb-[15px] grid justify-items-start gap-2">
             <div className="text-purple-dark text-right text-sm font-semibold">
@@ -98,15 +98,15 @@ export function VisualizeOS(props: FormProps) {
             </div>
           </div>
         </div>
-        <div className='w-[240px] pt-5 justify-center'>
+        <div className='w-[280px] pt-5 justify-center'>
           <div className="text-purple-dark text-center text-sm font-semibold pb-8">
             Tempo real de execução
           </div>
-          <div className='pb-9 max-h-[266px] h-[266px] overflow-auto scrollbar-hide pl-2.5'>
+          <div className='pb-9 max-h-[266px] h-[266px] overflow-auto scrollbar-hide pl-8 z-9'>
             <div className='gap-2 grid'>
               {workers.map((worker) => <div
                 key={worker.id}
-                className='w-[215px] h-[40px] text-purple-dark flex items-center justify-between'>
+                className='w-[235px] h-[40px] text-purple-dark flex items-center justify-between'>
                 <div className="flex items-center justify-around gap-3">
                   <AvatarColab width='w-[35px]' height='h-[35px]' img={worker.photo} name={worker.name} surname={worker.surname} />
                   <div>{worker.name} {worker.surname}</div>

@@ -277,6 +277,7 @@ export function AssignOneOrderForm(props: FormProps) {
                 <input
                   type='number'
                   min={1}
+                  step={.1}
                   className="text-[#768396] shadow-[#E5E5ED] focus:shadow-purple-light inline-flex h-[35px] w-[10px] flex-1 items-center justify-center rounded-[9px] px-[10px] text-[15px] leading-tight shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
                   id="soPlannedHours"
                   required
