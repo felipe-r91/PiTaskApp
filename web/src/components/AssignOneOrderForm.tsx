@@ -43,6 +43,7 @@ export function AssignOneOrderForm(props: FormProps) {
   const [osHours, setOsHours] = useState<number>(0);
   const [osAnnotation, setOsAnnotation] = useState<string>('');
   const [formPage, setFormPage] = useState(1);
+  const [backButton, setBackButton] = useState(true)
 
   useEffect(() => {
     api.get('/GetUnassignedOrder', {
@@ -98,6 +99,10 @@ export function AssignOneOrderForm(props: FormProps) {
   function handleAnnotationChange(event: ChangeEvent<HTMLTextAreaElement>) {
     const annotation = event.target.value
     setOsAnnotation(annotation)
+  }
+
+  function controlBackButton(){
+
   }
 
   async function assignOrder(event: FormEvent) {
@@ -346,12 +351,13 @@ export function AssignOneOrderForm(props: FormProps) {
     case 2:
       return (
         <>
-          <WorkersAssignHours orderId={osId} osWorker={osWorker} osBu={osBu} osHours={osHours} osDate={osDate} />
-
-          <button type='button' onClick={() => setFormPage(1)} className='w-24 h-9 flex justify-center items-center bg-[#EDECFE] text-base text-[#5051F9] hover:bg-[#5051F9] hover:text-white rounded-xl absolute right-40 bottom-7'>
-            <TbChevronLeft size={15} />
-            Voltar
-          </button>
+          <WorkersAssignHours orderId={osId} osWorker={osWorker} osBu={osBu} osHours={osHours} osDate={osDate} cntrlBackButton={setBackButton}/>
+          {backButton &&
+            <button type='button' onClick={() => setFormPage(1)} className='w-24 h-9 flex justify-center items-center bg-[#EDECFE] text-base text-[#5051F9] hover:bg-[#5051F9] hover:text-white rounded-xl absolute right-40 bottom-7'>
+              <TbChevronLeft size={15} />
+              Voltar
+            </button>
+          }
 
 
         </>

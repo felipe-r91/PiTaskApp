@@ -1,7 +1,7 @@
-import { ChangeEvent, FormEvent, useEffect, useRef, useState } from "react";
+import { ChangeEvent, Dispatch, FormEvent, SetStateAction, useEffect, useRef, useState } from "react";
 import { api } from "../lib/axios";
 import { AvatarColab } from "../assets/AvatarColab";
-import { TbArrowBackUp, TbCirclePlus } from "react-icons/tb";
+import { TbArrowBackUp, TbChevronLeft, TbCirclePlus } from "react-icons/tb";
 import dayjs from "dayjs";
 
 
@@ -14,6 +14,7 @@ interface WorkerHoursProps {
   osBu?: string,
   osDate?: string,
   isEditingOS?: boolean,
+  cntrlBackButton: Dispatch<SetStateAction<boolean>>
 }
 
 type Workers = {
@@ -37,6 +38,7 @@ interface FormVariables {
 }
 
 interface WorkerData {
+  rowId: number,
   id: number,
   name: string,
   surname: string,
@@ -48,12 +50,13 @@ interface WorkerData {
   showAddSequential: boolean,
   sequentialDays: number,
   addDays: boolean,
+  customDaysConcluded: boolean
 }
 
 export function WorkersAssignHours(props: WorkerHoursProps) {
 
-  function getOsHours(): number{
-    if(props.osHours){
+  function getOsHours(): number {
+    if (props.osHours) {
       return props.osHours
     } else {
       return 0
@@ -70,6 +73,7 @@ export function WorkersAssignHours(props: WorkerHoursProps) {
   })
   const [workersData, setWorkersData] = useState<WorkerData[]>([])
   const [customWorkerData, setCustomWorkerData] = useState<WorkerData>({
+    rowId: 0,
     id: 0,
     name: 'Azul',
     surname: 'string',
@@ -81,12 +85,14 @@ export function WorkersAssignHours(props: WorkerHoursProps) {
     showAddSequential: false,
     sequentialDays: 0,
     addDays: false,
+    customDaysConcluded: false,
   })
   const customDaysRef = useRef(2);
   var totalAssignedHours = 0;
-  var assignLabel = 'Equipe'
-  const [showAvailableHours, setShowAvailableHours] = useState(true)
-  const [assignedWorkersId, setAssignedWorkersId] = useState<AssignedId>([])
+  var assignLabel = 'Equipe';
+  const [test, setTest] = useState(false)
+  const [showAvailableHours, setShowAvailableHours] = useState(true);
+  const [assignedWorkersId, setAssignedWorkersId] = useState<AssignedId>([]);
 
   //Get workers for this Worker Order
   useEffect(() => {
@@ -96,9 +102,10 @@ export function WorkersAssignHours(props: WorkerHoursProps) {
       },
     }).then(response => {
       setFormState({ ...formState, workers: response.data });
-  
+
       // Update workersData using the response data
-      const updatedWorkersData = response.data.map((worker: { id: any; name: any; surname: any; photo: any; }) => ({
+      const updatedWorkersData = response.data.map((worker: { id: any; name: any; surname: any; photo: any; }, index: number) => ({
+        rowId: index,
         id: worker.id,
         name: worker.name,
         surname: worker.surname,
@@ -110,8 +117,9 @@ export function WorkersAssignHours(props: WorkerHoursProps) {
         showAddSequential: false,
         sequentialDays: 0,
         addDays: false,
+        customDaysConcluded: false,
       }));
-      
+
       setWorkersData(updatedWorkersData);
 
     });
@@ -137,8 +145,8 @@ export function WorkersAssignHours(props: WorkerHoursProps) {
       });
     }, [props.isEditingOS, props.orderId, props.osWorker1]);
   }
-  
-  
+
+
 
   /**/
 
@@ -168,13 +176,13 @@ export function WorkersAssignHours(props: WorkerHoursProps) {
         return 'Sem Unidade de Negócios'
     }
   }
-  
+
 
   //Submit Form with workers atribuittion
   function SubmitForm(event: FormEvent) {
     //Check is the use is not Editing the OS
     event.preventDefault()
-    if (!props.isEditingOS){
+    if (!props.isEditingOS) {
       //Structure to post data
       if (formState.availableHours >= 0) {
         const orderDetails = workersData.map(worker => ({
@@ -187,14 +195,14 @@ export function WorkersAssignHours(props: WorkerHoursProps) {
           sequentialDays: worker.sequentialDays,
           osStatus: 'assigned',
           orderId: props.orderId,
-          assignMode: formState.assignMode 
+          assignMode: formState.assignMode
         }));
         //Post and feedback alert
         /*api.post('/AssignOrderStep2', {
           orderDetails
         }).then(() => alert("Ordem atribuída com sucesso!"))*/
         console.log(orderDetails)
-  
+
       }
       //Alert user for error on total hours assigned
       if (formState.availableHours < 0) {
@@ -214,7 +222,7 @@ export function WorkersAssignHours(props: WorkerHoursProps) {
         sequentialDays: worker.sequentialDays,
         osStatus: 'assigned',
         orderId: props.orderId,
-        assignMode: formState.assignMode 
+        assignMode: formState.assignMode
       }));
       //Post and feedback alert
       api.post('/AssignOrderStep2', {
@@ -225,7 +233,7 @@ export function WorkersAssignHours(props: WorkerHoursProps) {
           workersId: assignedWorkersId[0].assigned_workers_id
         })
       }).then(() => alert("Ordem atualizada"))
-      
+
     }
   }
   //Submit CustomForm with workers atribuittion
@@ -233,10 +241,12 @@ export function WorkersAssignHours(props: WorkerHoursProps) {
     event.preventDefault()
     //Structure to post data
     if (formState.availableHours >= 0) {
-      
+
       /*Post and feedback alert
       alert('Dados salvos!')
       */
+
+      console.log(workersData)
 
     }
     //Alert user for error on total hours assigned
@@ -247,13 +257,13 @@ export function WorkersAssignHours(props: WorkerHoursProps) {
   }
   //Manage states when atribuittion mode is changed
   function handleAssignModeSelection() {
-    if(props.osWorker.length > 1){
+    if (props.osWorker.length > 1) {
       setFormState({
         ...formState,
         assignMode: !formState.assignMode, availableHours: getOsHours()
       })
-      setWorkersData((prevWorkersData)=>
-      prevWorkersData.map((worker) => ({ ... worker, addDays: false, showAddSequential: false, osDate:'1900-00-00', startHour:'00:00', endHour: '00:00'}))
+      setWorkersData((prevWorkersData) =>
+        prevWorkersData.map((worker) => ({ ...worker, addDays: false, showAddSequential: false, osDate: '1900-00-00', startHour: '00:00', endHour: '00:00' }))
       )
     }
   }
@@ -308,7 +318,7 @@ export function WorkersAssignHours(props: WorkerHoursProps) {
   }
   //Function to validate and render availible hours to allocate base on user inputs
   function handleHourSumEv(factor: number, isSeqDay: boolean, event?: ChangeEvent<HTMLInputElement>) {
-   
+
     var selectedSeqDay = 1;
     if (isSeqDay) {
       selectedSeqDay = Number(event?.target.value);
@@ -320,7 +330,7 @@ export function WorkersAssignHours(props: WorkerHoursProps) {
       const diff = endDate.diff(startDate)
       let lunch: number
 
-      if(Number(prevWorkersData[0].endHour.substring(0, 2)) >= 13){
+      if (Number(prevWorkersData[0].endHour.substring(0, 2)) >= 13) {
         lunch = 4800000
       } else {
         lunch = 0
@@ -330,7 +340,7 @@ export function WorkersAssignHours(props: WorkerHoursProps) {
       //const worker = updatedWorkersData[0]
       var diff1 = (((diff - lunch) / 3600000) * selectedSeqDay * factor)
       var diff2 = (((diff - lunch) / 3600000) * selectedSeqDay)
-      setWorkersData((prevWorkersData) => 
+      setWorkersData((prevWorkersData) =>
         prevWorkersData.map((worker) => ({
           ...worker,
           workerOsHours: diff2
@@ -338,7 +348,7 @@ export function WorkersAssignHours(props: WorkerHoursProps) {
       )
 
       totalAssignedHours = diff1
-      setFormState({ ...formState, availableHours: (getOsHours() - totalAssignedHours)})
+      setFormState({ ...formState, availableHours: (getOsHours() - totalAssignedHours) })
 
       return updatedWorkersData;
 
@@ -409,43 +419,56 @@ export function WorkersAssignHours(props: WorkerHoursProps) {
     if (isSeqDay) {
       selectedSeqDay = Number(event?.target.value);
     }
-  
+
     setWorkersData((prevWorkerData) => {
       const startDate = dayjs(prevWorkerData[index].osDate.concat(' ' + prevWorkerData[index].startHour))
       const endDate = dayjs(prevWorkerData[index].osDate.concat(' ' + prevWorkerData[index].endHour))
       const diff = endDate.diff(startDate)
       let lunch: number
-  
+
       if (Number(prevWorkerData[index].endHour.substring(0, 2)) >= 13) {
         lunch = 4800000
       } else {
         lunch = 0
       }
-  
+
       const updatedWorkersData = prevWorkerData.map((worker, i) =>
         i === index ? { ...worker, workerOsHours: ((diff - lunch) / 3600000) * selectedSeqDay } : worker
       );
-  
+
       const totalAssignedHours = updatedWorkersData.reduce((total, worker) => total + worker.workerOsHours, 0);
-      console.log(diff)
       setFormState((prevFormState) => ({
         ...prevFormState,
         availableHours: getOsHours() - totalAssignedHours,
       }));
-  
+
       return updatedWorkersData; // Return the updated state
     });
   }
-  
 
-  
+  useEffect(() => {
+    fixWorker()
+  }, [test])
+
   //Update array of data and render individual inputs for one worker
   function handleCustomDays(event: ChangeEvent<HTMLInputElement>,) {
     var updatedValue = Number(event.target.value)
     if (updatedValue > customDaysRef.current) {
       setFormState(prevState => ({ ...prevState, numberOfCustomDays: [...prevState.numberOfCustomDays, updatedValue] }))
-      setWorkersData(prevWorkers => [...prevWorkers, customWorkerData]);
-      
+      setWorkersData((prevWorkers) => {
+        const updatedWorkersData = [...prevWorkers];
+        updatedWorkersData.push(customWorkerData);
+        const index = updatedWorkersData.length - 1;
+        updatedWorkersData[index] = {
+          ...updatedWorkersData[index],
+          id: workersData[formState.customWorkerIndex].id,
+          name: workersData[formState.customWorkerIndex].name,
+          surname: workersData[formState.customWorkerIndex].surname,
+          rowId: index,
+        };
+        return updatedWorkersData;
+      });
+
     } else {
       setFormState(prevState => ({ ...prevState, numberOfCustomDays: prevState.numberOfCustomDays.slice(0, -1) }))
       setWorkersData(prevWorkersData => {
@@ -454,19 +477,48 @@ export function WorkersAssignHours(props: WorkerHoursProps) {
         updatedWorkersData.pop();
         return updatedWorkersData;
       });
-      
+
     }
     customDaysRef.current = updatedValue
   }
-  
-  function fixWorker(){
+
+  function fixWorker() {
     setWorkersData((prevWorkerData) =>
       prevWorkerData.map((worker, i) =>
-        worker.id === 0 ? { ...worker, id: workersData[formState.customWorkerIndex].id, name: workersData[formState.customWorkerIndex].name, surname: workersData[formState.customWorkerIndex].surname } : worker
+        worker.id === 0 ? { ...worker, id: workersData[formState.customWorkerIndex].id, name: workersData[formState.customWorkerIndex].name, surname: workersData[formState.customWorkerIndex].surname, rowId: (workersData.length - 1) } : worker
       )
     )
   }
 
+  function cancelCustomWorker(){
+    
+    setWorkersData(prevWorkersData => {
+      // Create a new array excluding the last element
+      const updatedWorkersData = [...prevWorkersData];
+      for(var i = 0; i < (customDaysRef.current - 1); i++){
+        console.log('pop')
+        updatedWorkersData.pop();
+      }
+      customDaysRef.current = 2
+      return updatedWorkersData;
+    });
+  }
+
+  function getRowIdsById(workerId: number): number[] {
+    const matchingWorkers = workersData.filter(worker => worker.id === workerId);
+    const rowIds = matchingWorkers.map(worker => worker.rowId);
+    return rowIds;
+  }
+
+  function handleDateSelectionCustom(event: ChangeEvent<HTMLInputElement>, index: number, rows: number[]){
+    const selectedDate = event.target.value
+    setWorkersData((prevWorkerData) =>
+      prevWorkerData.map((worker) =>
+        worker.rowId === rows[index] ? { ...worker, osDate: selectedDate } : worker
+      )
+    )
+    //console.log(rows[index])
+  }
   switch (formState.formPage) {
     case 0:
       return (
@@ -501,7 +553,7 @@ export function WorkersAssignHours(props: WorkerHoursProps) {
           </div>
           <form onSubmit={SubmitForm} id="workersHours" className="py-14 pl-8">
             <div className='overflow-auto max-h-80 gap-3 grid pb-10 scrollbar-hide'>
-              {!formState.assignMode &&  
+              {!formState.assignMode &&
                 <div className="flex gap-14 items-center min-h-[71px]">
                   <div className="bg-purple-light w-[215px] rounded-[10px]">
                     <div className="flex pt-5 pl-8 max-w-[190px] overflow-x-auto scrollbar-hide">
@@ -519,13 +571,13 @@ export function WorkersAssignHours(props: WorkerHoursProps) {
 
                     </div>
                     <div className="pb-5">
-                      {formState.workers.map((worker) =>  (
-                          <div className="grid justify-start pt-[14px] pl-[46px]" key={worker.id}>
-                            <div className="text-white">
-                              {worker.name} {worker.surname}
-                            </div>
+                      {formState.workers.map((worker) => (
+                        <div className="grid justify-start pt-[14px] pl-[46px]" key={worker.id}>
+                          <div className="text-white">
+                            {worker.name} {worker.surname}
                           </div>
-                        
+                        </div>
+
                       ))}
                     </div>
                   </div>
@@ -553,7 +605,7 @@ export function WorkersAssignHours(props: WorkerHoursProps) {
                         min={props.osDate}
                         className="text-[#768396] shadow-[#E5E5ED] focus:shadow-purple-light inline-flex h-[35px] w-[100px] flex-1 items-center justify-center rounded-[9px] px-[10px] py-2 text-[15px] leading-tight shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
                         required
-                        onChange={e => { handleStartHourSelectionEv(e); handleHourSumEv(workersData.length, false) ; setShowAvailableHours(false) }}
+                        onChange={e => { handleStartHourSelectionEv(e); handleHourSumEv(workersData.length, false); setShowAvailableHours(false) }}
 
                       />
                     </fieldset>
@@ -566,10 +618,10 @@ export function WorkersAssignHours(props: WorkerHoursProps) {
                         min={props.osDate}
                         className="text-[#768396] shadow-[#E5E5ED] focus:shadow-purple-light inline-flex h-[35px] w-[100px] flex-1 items-center justify-center rounded-[9px] px-[10px] py-2 text-[15px] leading-tight shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
                         required
-                        onChange={e => { handleEndHourSelectionEv(e); handleHourSumEv(workersData.length, false); setShowAvailableHours(true)  }}
+                        onChange={e => { handleEndHourSelectionEv(e); handleHourSumEv(workersData.length, false); setShowAvailableHours(true) }}
                       />
                     </fieldset>
-                  
+
                     <div>
                       {workersData.length > 0 && !workersData[0].addDays &&
                         <><div>
@@ -586,20 +638,20 @@ export function WorkersAssignHours(props: WorkerHoursProps) {
                           <div className='w-fit h-[20px] rounded-xl px-3 bg-purple-light text-white text-[12px] flex items-center justify-between'>
                             Sequencial
                           </div>
-                          
-                            <div className="pl-5 flex gap-4 items-center">
-                              <input
-                                type="number"
-                                min={2}
-                                defaultValue={0}
-                                onChange={e => { handleAddSequentialDayEv(e); handleHourSumEv(workersData.length, true, e) }}
-                                className="text-[#768396] shadow-[#E5E5ED] focus:shadow-purple-light inline-flex h-[35px] max-w-[50px] flex-1 items-center justify-center rounded-[9px] px-[10px] py-2 text-[15px] leading-tight shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]">
-                              </input>
-                              <button type="button" onClick={() => { handleAddDaysEv(); handleHourSumEv(workersData.length, false); handleCancelSequentiaDaysEv() }}>
-                                <TbArrowBackUp size={24} color="#8D98A9" />
-                              </button>
-                            </div>
-                          
+
+                          <div className="pl-5 flex gap-4 items-center">
+                            <input
+                              type="number"
+                              min={2}
+                              defaultValue={0}
+                              onChange={e => { handleAddSequentialDayEv(e); handleHourSumEv(workersData.length, true, e) }}
+                              className="text-[#768396] shadow-[#E5E5ED] focus:shadow-purple-light inline-flex h-[35px] max-w-[50px] flex-1 items-center justify-center rounded-[9px] px-[10px] py-2 text-[15px] leading-tight shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]">
+                            </input>
+                            <button type="button" onClick={() => { handleAddDaysEv(); handleHourSumEv(workersData.length, false); handleCancelSequentiaDaysEv() }}>
+                              <TbArrowBackUp size={24} color="#8D98A9" />
+                            </button>
+                          </div>
+
                         </div>
                       }
                     </div>
@@ -607,112 +659,121 @@ export function WorkersAssignHours(props: WorkerHoursProps) {
                 </div>
               }
               {formState.assignMode &&
-                workersData.map((worker, index) =>  (
-                    <div className="flex gap-14 items-center min-h-[71px]"
-                      key={worker.id}
-                    >
-                      <div className='w-[215px] h-[50px] rounded-[10px] shadow-custom bg-purple-light text-white flex pl-5 items-center justify-between'>
-                        <div className="flex items-center justify-around gap-6">
-                          <AvatarColab width='w-[35px]' height='h-[35px]' img={worker.photo} name={worker.name} surname={worker.surname} />
-                          <div>{worker.name} {worker.surname}</div>
-                        </div>
-                      </div>
-                      <fieldset className="pb-2 gap-5 w-[150px]">
-                        <label className=" pl-10 text-purple-dark text-right text-sm font-semibold flex">
-                          Data início
-                        </label>
-                        <div className='flex px-1 pt-1'>
-                          <input
-                            type='date'
-                            min={props.osDate}
-                            className="text-[#768396] shadow-[#E5E5ED] focus:shadow-purple-light inline-flex h-[35px] w-[54px] flex-1 items-center justify-center rounded-[9px] px-[10px] py-2 text-[15px] leading-tight shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
-                            required
-                            onChange={e => handleDateSelection(e, index)}
-                          />
-                        </div>
-                      </fieldset>
-                      <fieldset className="pb-2 gap-5 w-fit">
-                        <label className=" text-purple-dark text-right text-sm font-semibold pb-1 flex">
-                          Hora início
-                        </label>
-                        <input
-                          type="time"
-                          //min={props.osDate}
-                          className="text-[#768396] shadow-[#E5E5ED] focus:shadow-purple-light inline-flex h-[35px] w-[100px] flex-1 items-center justify-center rounded-[9px] px-[10px] py-2 text-[15px] leading-tight shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
-                          required
-                          onChange={e => { handleStartHourSelection(e, index); handleHourSum(index, false); setShowAvailableHours(false) }}
-                        />
-                      </fieldset>
-                      <fieldset className="pb-2 gap-5 w-fit">
-                        <label className=" text-purple-dark text-right text-sm font-semibold pb-1 flex">
-                          Hora fim
-                        </label>
-                        <input
-                          type="time"
-                          //min={props.osDate}
-                          className="text-[#768396] shadow-[#E5E5ED] focus:shadow-purple-light inline-flex h-[35px] w-[100px] flex-1 items-center justify-center rounded-[9px] px-[10px] py-2 text-[15px] leading-tight shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
-                          required
-                          onChange={e => { handleEndHourSelection(e, index); handleHourSum(index, false); setShowAvailableHours(true) }}
-                          autoComplete="false"
-                        />
-                      </fieldset>
-                      <div>
-                        {!workersData[index].addDays &&
-                          <div>
-                            <div className="text-purple-dark text-right text-sm font-semibold pb-2">
-                              Adicionar dias
-                            </div>
-                            <button type="button" onClick={() => handleAddDays(index)} className="pl-9">
-                              <TbCirclePlus size={24} color="#8D98A9" />
-                            </button>
-                          </div>
-                        }
-                        {workersData[index].addDays &&
-                          <div className="gap-2 grid pb-2">
-                            <div className="flex gap-2 bg-[#edecfe] border border-[#E5E5ED] rounded-xl">
-                              <button type="button" onClick={() => handleShowSequentialDay(index)} className={`w-fit h-[20px] rounded-xl px-3  ${!workersData[index].showAddSequential ? 'bg-purple-light' : 'bg-[#edecfe]'} ${!workersData[index].showAddSequential ? 'text-white' : 'text-purple-dark'}  text-[12px] flex items-center justify-between`}>
-                                Sequencial
-                              </button>
-                              <button type="button" onClick={() => handleShowSequentialDay(index)} className={`w-fit h-[20px] rounded-xl px-3  ${workersData[index].showAddSequential ? 'bg-purple-light' : 'bg-[#edecfe]'} ${workersData[index].showAddSequential ? 'text-white' : 'text-purple-dark'} ${workersData[index].showAddSequential ? 'border-none' : 'border border-[#E5E5ED]'} text-[12px] flex items-center justify-between`}>
-                                Personalizar
-                              </button>
-                            </div>
-                            {!workersData[index].showAddSequential &&
-                              <div className="pl-12 flex gap-4 items-center">
-                                <input
-                                  type="number"
-                                  min={2}
-                                  defaultValue={0}
-                                  onChange={e => { handleAddSequentialDay(e, index); handleHourSum(index, true, e) }}
-                                  className="text-[#768396] shadow-[#E5E5ED] focus:shadow-purple-light inline-flex h-[35px] max-w-[50px] flex-1 items-center justify-center rounded-[9px] px-[10px] py-2 text-[15px] leading-tight shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]">
-                                </input>
-                                <button type="button" onClick={() => { handleAddDays(index); handleHourSum(index, false); handleCancelSequentiaDays(index) }}>
-                                  <TbArrowBackUp size={24} color="#8D98A9" />
-                                </button>
-                              </div>
-                            }
-                            {workersData[index].showAddSequential &&
-                              <div className="pl-5 h-[35px] flex items-center">
-                                <div className="text-purple-dark text-right text-sm font-semibold">
-                                  Escolher Datas
-                                </div>
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    setFormState({ ...formState, formPage: 1, customWorkerIndex: index });
-                                    setCustomWorkerData(prevData =>({...prevData, id: workersData[index].id, name: workersData[index].name, surname: workersData[index].surname}));
-                                    setWorkersData(prevWorkers => [...prevWorkers, customWorkerData]);
-                                  }}
-                                  className="pl-3">
-                                  <TbCirclePlus size={24} color="#8D98A9" />
-                                </button>
-                              </div>
-                            }
-                          </div>
-                        }
+                workersData.map((worker, index) => (
+                  <div className="flex gap-14 items-center min-h-[71px]"
+                    key={worker.id}
+                  >
+                    <div className='w-[215px] h-[50px] rounded-[10px] shadow-custom bg-purple-light text-white flex pl-5 items-center justify-between'>
+                      <div className="flex items-center justify-around gap-6">
+                        <AvatarColab width='w-[35px]' height='h-[35px]' img={worker.photo} name={worker.name} surname={worker.surname} />
+                        <div>{worker.name} {worker.surname}</div>
                       </div>
                     </div>
-                  )
+                    <fieldset className="pb-2 gap-5 w-[150px]">
+                      <div>{worker.rowId}</div>
+                      <label className=" pl-10 text-purple-dark text-right text-sm font-semibold flex">
+                        Data início
+                      </label>
+                      <div className='flex px-1 pt-1'>
+                        <input
+                          type='date'
+                          min={props.osDate}
+                          className="text-[#768396] shadow-[#E5E5ED] focus:shadow-purple-light inline-flex h-[35px] w-[54px] flex-1 items-center justify-center rounded-[9px] px-[10px] py-2 text-[15px] leading-tight shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
+                          required
+                          onChange={e => handleDateSelection(e, index)}
+                        />
+                      </div>
+                    </fieldset>
+                    <fieldset className="pb-2 gap-5 w-fit">
+                      <label className=" text-purple-dark text-right text-sm font-semibold pb-1 flex">
+                        Hora início
+                      </label>
+                      <input
+                        type="time"
+                        //min={props.osDate}
+                        className="text-[#768396] shadow-[#E5E5ED] focus:shadow-purple-light inline-flex h-[35px] w-[100px] flex-1 items-center justify-center rounded-[9px] px-[10px] py-2 text-[15px] leading-tight shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
+                        required
+                        onChange={e => { handleStartHourSelection(e, index); handleHourSum(index, false); setShowAvailableHours(false) }}
+                      />
+                    </fieldset>
+                    <fieldset className="pb-2 gap-5 w-fit">
+                      <label className=" text-purple-dark text-right text-sm font-semibold pb-1 flex">
+                        Hora fim
+                      </label>
+                      <input
+                        type="time"
+                        //min={props.osDate}
+                        className="text-[#768396] shadow-[#E5E5ED] focus:shadow-purple-light inline-flex h-[35px] w-[100px] flex-1 items-center justify-center rounded-[9px] px-[10px] py-2 text-[15px] leading-tight shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
+                        required
+                        onChange={e => { handleEndHourSelection(e, index); handleHourSum(index, false); setShowAvailableHours(true) }}
+                        autoComplete="false"
+                      />
+                    </fieldset>
+                    <div>
+                      {!workersData[index].addDays &&
+                        <div>
+                          <div className="text-purple-dark text-right text-sm font-semibold pb-2">
+                            Adicionar dias
+                          </div>
+                          <button type="button" onClick={() => handleAddDays(index)} className="pl-9">
+                            <TbCirclePlus size={24} color="#8D98A9" />
+                          </button>
+                        </div>
+                      }
+                      {workersData[index].addDays &&
+                        <div className="gap-2 grid pb-2">
+                          <div className="flex gap-2 bg-[#edecfe] border border-[#E5E5ED] rounded-xl">
+                            <button type="button" onClick={() => handleShowSequentialDay(index)} className={`w-fit h-[20px] rounded-xl px-3  ${!workersData[index].showAddSequential ? 'bg-purple-light' : 'bg-[#edecfe]'} ${!workersData[index].showAddSequential ? 'text-white' : 'text-purple-dark'}  text-[12px] flex items-center justify-between`}>
+                              Sequencial
+                            </button>
+                            <button type="button" onClick={() => handleShowSequentialDay(index)} className={`w-fit h-[20px] rounded-xl px-3  ${workersData[index].showAddSequential ? 'bg-purple-light' : 'bg-[#edecfe]'} ${workersData[index].showAddSequential ? 'text-white' : 'text-purple-dark'} text-[12px] flex items-center justify-between`}>
+                              Personalizar
+                            </button>
+                          </div>
+                          {!workersData[index].showAddSequential &&
+                            <div className="pl-12 flex gap-4 items-center">
+                              <input
+                                type="number"
+                                min={2}
+                                defaultValue={0}
+                                onChange={e => { handleAddSequentialDay(e, index); handleHourSum(index, true, e) }}
+                                className="text-[#768396] shadow-[#E5E5ED] focus:shadow-purple-light inline-flex h-[35px] max-w-[50px] flex-1 items-center justify-center rounded-[9px] px-[10px] py-2 text-[15px] leading-tight shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]">
+                              </input>
+                              <button type="button" onClick={() => { handleAddDays(index); handleHourSum(index, false); handleCancelSequentiaDays(index) }}>
+                                <TbArrowBackUp size={24} color="#8D98A9" />
+                              </button>
+                            </div>
+                          }
+                          {workersData[index].showAddSequential &&
+                            <div className="pl-5 h-[35px] flex items-center">
+                              <div className="text-purple-dark text-right text-sm font-semibold">
+                                Escolher Datas
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setFormState((prevFormState) => ({
+                                    ...prevFormState,
+                                    formPage: 1,
+                                    customWorkerIndex: index,
+                                  }));
+                                  setWorkersData((prevWorkers) => {
+                                    const updatedWorkers = [...prevWorkers, customWorkerData];
+                                    return updatedWorkers;
+                                  });
+                                  setTest(true);
+                                  props.cntrlBackButton(false)
+                                }}
+                                className="pl-3">
+                                <TbCirclePlus size={24} color="#8D98A9" />
+                              </button>
+                            </div>
+                          }
+                        </div>
+                      }
+                    </div>
+                  </div>
+                )
                 )
               }
             </div>
@@ -753,13 +814,19 @@ export function WorkersAssignHours(props: WorkerHoursProps) {
                       <div>{workersData[formState.customWorkerIndex].name}</div>
                     </div>
                   </div>
-                  
-                  <div>{workersData.map((worker, i) => { return (<div key={i}>{worker.name}</div>)})}</div>
+
+                  <div>
+                    {//workersData.map((worker, i) => { return (<div key={i}>{worker.name} {worker.rowId}</div>) })}
+                      }
+                  </div>
                 </div>
-                <div className="grid grid-rows gap-4 items-center">                                 
+                <div className="grid grid-rows gap-4 items-center">
                   {formState.numberOfCustomDays.map((number, index) => {
+                    const workerId = workersData[formState.customWorkerIndex].id
+                    const rowIdsById = getRowIdsById(workerId)
                     return (
                       <div className="flex" key={number}>
+                        <div>{getRowIdsById(workerId)}</div>
                         <fieldset className="pb-2 pr-12 w-[198px]">
                           <label className=" pl-10 text-purple-dark text-right text-sm font-semibold flex">
                             Data início
@@ -770,8 +837,7 @@ export function WorkersAssignHours(props: WorkerHoursProps) {
                               min={props.osDate}
                               className="text-[#768396] shadow-[#E5E5ED] focus:shadow-purple-light inline-flex h-[35px] w-[54px] flex-1 items-center justify-center rounded-[9px] px-[10px] py-2 text-[15px] leading-tight shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
                               required
-                              onFocus={()=> fixWorker()}
-                            //onChange={e => { handleDateSelection(e, index, workers[formState.customWorkerIndex].id) }} 
+                              onChange={e => handleDateSelectionCustom(e, index, rowIdsById)}
                             />
                           </div>
                         </fieldset>
@@ -782,7 +848,7 @@ export function WorkersAssignHours(props: WorkerHoursProps) {
                           <input
                             type="time"
                             className="text-[#768396] shadow-[#E5E5ED] focus:shadow-purple-light inline-flex h-[35px] w-[100px] flex-1 items-center justify-center rounded-[9px] px-[10px] py-2 text-[15px] leading-tight shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
-                            required
+                            //required
                           //value={startHour[index]}
                           //onChange={e => { handleStartHourSelection(e, index); handleHourSum(index, false) }} 
                           />
@@ -794,7 +860,7 @@ export function WorkersAssignHours(props: WorkerHoursProps) {
                           <input
                             type="time"
                             className="text-[#768396] shadow-[#E5E5ED] focus:shadow-purple-light inline-flex h-[35px] w-[100px] flex-1 items-center justify-center rounded-[9px] px-[10px] py-2 text-[15px] leading-tight shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
-                            required
+                            //required
                           //value={endHour[index]}
                           //onChange={e => { handleEndHourSelection(e, index); handleHourSum(index, false) }} 
                           />
@@ -824,6 +890,10 @@ export function WorkersAssignHours(props: WorkerHoursProps) {
               Salvar
             </button>
           </form>
+          <button type='button' onClick={() => { setFormState({ ...formState, formPage: 0, numberOfCustomDays: [1, 2] }), props.cntrlBackButton(true); cancelCustomWorker() }} className='w-24 h-9 flex justify-center items-center gap-1 bg-[#EDECFE] text-base text-[#5051F9] hover:bg-[#5051F9] hover:text-white rounded-xl absolute right-40 bottom-7'>
+            <TbArrowBackUp size={15} />
+            Desfazer
+          </button>
         </>
 
       )

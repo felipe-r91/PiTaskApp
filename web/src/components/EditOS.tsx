@@ -36,6 +36,7 @@ export function EditOS(props: FormProps) {
   const [newWorkers, setNewWorkers] = useState<number[]>([])
   const [workersId, setWorkersId] = useState<number[]>([])
   const [formPage, setFormPage] = useState<number>(0)
+  const [backButton, setBackButton] = useState(true)
   const totalWorkedHours: number[] = []
 
   useEffect(() => {
@@ -305,7 +306,7 @@ export function EditOS(props: FormProps) {
               </button>
             }
             {showUndoButton &&
-              <button type='button' onClick={undo} className='w-24 h-9 flex justify-center items-center gap-1 bg-[#EDECFE] text-base text-[#5051F9] hover:bg-[#5051F9] hover:text-white rounded-xl absolute right-40 bottom-7'>
+              <button type='button' onClick={() => {undo(); setShowUndoBtn(!showUndoButton)}} className='w-24 h-9 flex justify-center items-center gap-1 bg-[#EDECFE] text-base text-[#5051F9] hover:bg-[#5051F9] hover:text-white rounded-xl absolute right-40 bottom-7'>
                 <TbArrowBackUp size={15} />
                 Desfazer
               </button>
@@ -316,14 +317,13 @@ export function EditOS(props: FormProps) {
     case 1:
       return (
         <>
-          <WorkersAssignHours orderId={getOrderId()} osWorker={newWorkers} osWorker1={workersId} osBu={orderDetails?.bu} osHours={orderDetails?.planned_hours} isEditingOS={true} />
-
-          <button type='button' onClick={() => {setFormPage(0); setNewWorkers([])}} className='w-24 h-9 flex justify-center items-center bg-[#EDECFE] text-base text-[#5051F9] hover:bg-[#5051F9] hover:text-white rounded-xl absolute right-40 bottom-7'>
-            <TbChevronLeft size={15} />
-            Voltar
-          </button>
-
-
+          <WorkersAssignHours orderId={getOrderId()} osWorker={newWorkers} osWorker1={workersId} osBu={orderDetails?.bu} osHours={orderDetails?.planned_hours} isEditingOS={true} cntrlBackButton={setBackButton} />
+          {backButton &&
+            <button type='button' onClick={() => { setFormPage(0); setNewWorkers([]) }} className='w-24 h-9 flex justify-center items-center bg-[#EDECFE] text-base text-[#5051F9] hover:bg-[#5051F9] hover:text-white rounded-xl absolute right-40 bottom-7'>
+              <TbChevronLeft size={15} />
+              Voltar
+            </button>
+          }
         </>
       )
   }
