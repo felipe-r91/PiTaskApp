@@ -50,6 +50,13 @@ export function VisualizeOS(props: FormProps) {
     }
   }
 
+  function calcTotalExecHours(): string{
+    const totalHours = totalWorkedHours.reduce((acc, currValue) => {
+      return acc += currValue;
+    }, 0)
+    return totalHours.toFixed(2)
+  }
+
   return (
     <>
       <div className='absolute left-[430px] top-8'>
@@ -123,9 +130,7 @@ export function VisualizeOS(props: FormProps) {
                   Executado
                 </div>
                 <div className="text-[#768396]">
-                  {totalWorkedHours.reduce((acc, currValue) => {
-                    return acc += currValue;
-                  }, 0)}h
+                  {calcTotalExecHours()}h
                 </div>
               </div>
               <div className='pt-[10px] flex justify-between items-center gap-3'>

@@ -333,7 +333,7 @@ export async function appRoutes(app: FastifyInstance) {
     //to-do
   })
 
-  app.post('/EditOrderDelete',async (request) => {
+  app.post('/EditOrder',async (request) => {
     const editOrder = z.object({
       orderId: z.number(),
       workersToDelete: z.number().array(),

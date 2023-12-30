@@ -80,7 +80,7 @@ export function EditOS(props: FormProps) {
 
   async function submitForm() {
 
-    await api.post('/EditOrderDelete', {
+    await api.post('/EditOrder', {
       orderId,
       workersToDelete,
       workersIdToUpdate
@@ -113,8 +113,8 @@ export function EditOS(props: FormProps) {
   }
 
   function workersToAdd() {
-    //const remainingWorkers = allWorkers.filter((worker) => !workers.some((w) => w.id === worker.id));
-    //setAllWorkers(remainingWorkers)
+    const remainingWorkers = allWorkers.filter((worker) => !workers.some((w) => w.id === worker.id));
+    setAllWorkers(remainingWorkers)
   }
 
   function toogleAddWorker(id: number) {
@@ -135,6 +135,13 @@ export function EditOS(props: FormProps) {
       fixedArray.push(fixedId)
     })
     setNewWorkers(fixedArray)
+  }
+
+  function calcTotalExecHours(): string{
+    const totalHours = totalWorkedHours.reduce((acc, currValue) => {
+      return acc += currValue;
+    }, 0)
+    return totalHours.toFixed(2)
   }
 
   switch (formPage) {
@@ -235,9 +242,7 @@ export function EditOS(props: FormProps) {
                           Executado
                         </div>
                         <div className="text-[#768396]">
-                          {totalWorkedHours.reduce((acc, currValue) => {
-                            return acc += currValue;
-                          }, 0)}h
+                          {calcTotalExecHours()}h
                         </div>
                       </div>
                       <div className='pt-[10px] flex justify-between items-center gap-3'>

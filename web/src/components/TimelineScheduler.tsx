@@ -286,7 +286,6 @@ export function TimelineScheduler(props: Props) {
         }
         setVisualizeDialogOpen(true)
         setStartDateCalendar(new DayPilot.Date(args.source.start()))
-        console.log(orderToDisplay)
       }
     },
   ]
