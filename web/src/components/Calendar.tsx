@@ -52,8 +52,10 @@ export function Calendar(props: CalendarProps) {
   const [isEditDialogOpen, setEditDialogOpen] = useState(false)
   const [orderNumber, setOrderNumber] = useState(0)
   const [orderToDisplay, setOrderToDisplay] = useState<Order>()
-  const [startDateCalendar, setStartDateCalendar] = useState<DayPilot.Date>(new DayPilot.Date())
+  const [startDateCal, setStartDateCal] = useState<DayPilot.Date>(new DayPilot.Date().getDatePart())
   let orderId: number
+  let ctrlEvent: boolean
+  let newEvent: DayPilot.Event
 
   function buColor(orderBu: string) {
     switch (orderBu) {
@@ -79,20 +81,6 @@ export function Calendar(props: CalendarProps) {
         return '#f4e3b9';
       case 'SB':
         return '#e5e5ed'
-    }
-  }
-
-  function toolTip(orderBu: string, startDate: string, endDate: string) {
-    switch (orderBu) {
-      default:
-      case 'ER':
-        return 'Equip. Refrigeração'.concat('\n').concat('Início: ' + startDate.substring(11, 16)).concat('\n').concat('Final: ' + endDate.substring(11, 16))
-      case 'MI':
-        return 'Manut. Industrial'.concat('\n').concat('Início: ' + startDate.substring(11, 16)).concat('\n').concat('Final: ' + endDate.substring(11, 16))
-      case 'MR':
-        return 'Manut. Refrigeração'.concat('\n').concat('Início: ' + startDate.substring(11, 16)).concat('\n').concat('Final: ' + endDate.substring(11, 16))
-      case 'SB':
-        return 'Sem Bussiness Unit'.concat('\n').concat('Início: ' + startDate.substring(11, 16)).concat('\n').concat('Final: ' + endDate.substring(11, 16))
     }
   }
 
@@ -153,7 +141,7 @@ export function Calendar(props: CalendarProps) {
       onClick: (args: any) => {
         const textSource = args.source.text().substring(5, 15)
         const orderNumber = Number(textSource.split('\n')[0])
-        setStartDateCalendar(new DayPilot.Date(args.source.start()))
+        setStartDateCal(new DayPilot.Date(args.source.start().getDatePart()))
         setOrderNumber(orderNumber)
         setEditDialogOpen(true)
       }
@@ -163,7 +151,7 @@ export function Calendar(props: CalendarProps) {
       onClick: (args: any) => {
         const textSource = args.source.text().substring(5, 15)
         const orderNumber = Number(textSource.split('\n')[0])
-        setStartDateCalendar(new DayPilot.Date(args.source.start()))       
+        setStartDateCal(new DayPilot.Date(args.source.start().getDatePart()))    
         setOrderNumber(orderNumber)
         setVisualizeDialogOpen(true)
       }
@@ -173,7 +161,7 @@ export function Calendar(props: CalendarProps) {
       onClick: (args: any) => {
         const textSource = args.source.text().substring(5, 15)
         const orderNumber = Number(textSource.split('\n')[0])
-        setStartDateCalendar(new DayPilot.Date(args.source.start()))
+        setStartDateCal(new DayPilot.Date(args.source.start().getDatePart()))
         setOrderNumber(orderNumber)
         setConcludeDialogOpen(true)
       }
@@ -186,7 +174,7 @@ export function Calendar(props: CalendarProps) {
       onClick: (args: any) => {
         const textSource = args.source.text().substring(5, 15)
         const orderNumber = Number(textSource.split('\n')[0])
-        setStartDateCalendar(new DayPilot.Date(args.source.start()))
+        setStartDateCal(new DayPilot.Date(args.source.start().getDatePart()))
         setOrderNumber(orderNumber)
         setVisualizeDialogOpen(true)
       }
@@ -201,22 +189,22 @@ export function Calendar(props: CalendarProps) {
     hideOnMouseOut: true
   })
 
-  const [configNav, setConfigNav] = useState<DayPilot.NavigatorConfig>({
+  const [configNav] = useState<DayPilot.NavigatorConfig>({
     locale: 'pt-br',
     theme: 'daypilotnav',
     selectMode: "Day",
     showMonths: 2,
     skipMonths: 1,
     showWeekNumbers: true,
-    startDate: startDateCalendar
+    startDate: startDateCal
   })
-
+  
   const [configCal, setConfigCal] = useState<DayPilot.CalendarConfig>({
     locale: 'pt-br',
     viewType: "Resources",
     theme: 'daypilotcalendar',
     allowEventOverlap: false,
-    startDate: startDateCalendar,
+    startDate: startDateCal,
     cellHeight: 30,
     headerHeight: 150,
     cellDuration: 60,
@@ -229,7 +217,7 @@ export function Calendar(props: CalendarProps) {
     onEventClicked:(args: any) => {
       const startDate = args.e.start()
       const endDate = args.e.end()
-      alert(`Event start: ${startDate.toString('d/M/yyyy HH:mm')}\nEvent end: ${endDate.toString('d/M/yyyy HH:mm')}`)
+      alert(`Início do Evento: ${startDate.toString('d/M/yyyy HH:mm')}\nFinal do Evento: ${endDate.toString('d/M/yyyy HH:mm')}`)
     },
 
     onEventResized: (args : any) => {
@@ -246,26 +234,48 @@ export function Calendar(props: CalendarProps) {
 
     onEventMove: (args: any) =>{
       const eventDataTag = args.e.data.tags[0]
+      ctrlEvent = args.ctrl
       orderId = Number(eventDataTag)
+      if(args.ctrl){
+        newEvent = new DayPilot.Event({
+          start: args.newStart,
+          end: args.newEnd,
+          text: 'Copy' + args.e.text(),
+          resource: args.newResource,
+          id: DayPilot.guid()
+        })
+
+      }
+    },
+    onEventRightClick: (args: any) => {
+      
     },
      onEventMoved:(args: any) => {
-      const eventId = args.e.data.id.toString();
-      const resourceId = args.e.data.resource;
-      const newEventStart = args.newStart.value;
-      const newEventEnd = args.newEnd.value;
-      api.post('/CalendarEventMoved', {
-        eventId,
-        newEventStart,
-        newEventEnd,
-        resourceId,
-        orderId
-      }).then(() => alert('Atribuição atualizada!'));
+      if(!ctrlEvent){
+        const eventId = args.e.data.id.toString();
+        const resourceId = args.e.data.resource;
+        const newEventStart = args.newStart.value;
+        const newEventEnd = args.newEnd.value;
+        api.post('/CalendarEventMoved', {
+          eventId,
+          newEventStart,
+          newEventEnd,
+          resourceId,
+          orderId
+        }).then(() => alert('Atribuição atualizada!'));
+      } else {
+        alert('Evento copiado')
+        // to-do get the last eventId on db
+        // create new event
+        
+      }
     }    
   });
 
   const calendarRef = useRef<DayPilotCalendar>(null);
 
   function handleTimeRangeSelected(args: DayPilot.NavigatorTimeRangeSelectedArgs) {
+    console.log(args.day)
     calendarRef.current!.control.update({
       startDate: args.day
     });
@@ -300,16 +310,11 @@ export function Calendar(props: CalendarProps) {
     // Update the config object
     setConfigCal({
       ...configCal,
-      startDate: startDateCalendar,
+      startDate: startDateCal,
       columns: newColumnsData,
       events: newEventsData,
     });
-
-    setConfigNav({
-      ...configNav,
-      startDate: startDateCalendar
-    })
-  }, [props.orders, startDateCalendar, isConcludeDialogOpen, isEditDialogOpen, isVisualizeDialogOpen]);
+  }, [props.orders, startDateCal, isConcludeDialogOpen, isEditDialogOpen, isVisualizeDialogOpen]);
 
   return (
     <>
@@ -347,7 +352,7 @@ export function Calendar(props: CalendarProps) {
               Concluir Ordem de Serviço
             </DialogTitle>
             <DialogClose
-              onClick={() => { setConcludeDialogOpen(false) }}
+              onClick={() => { setConcludeDialogOpen(false); props.fetchAssignedOrders() }}
               className="absolute right-6 top-6 hover:bg-purple-100 rounded-full focus:outline-none">
               <FiX size={24} color='#5051F9' />
             </DialogClose>
@@ -363,7 +368,7 @@ export function Calendar(props: CalendarProps) {
               Visualizar Ordem de Serviço
             </DialogTitle>
             <DialogClose
-              onClick={() => { setVisualizeDialogOpen(false) }}
+              onClick={() => { setVisualizeDialogOpen(false); props.fetchAssignedOrders() }}
               className="absolute right-6 top-6 hover:bg-purple-100 rounded-full">
               <FiX size={24} color='#5051F9' />
             </DialogClose>
@@ -379,7 +384,7 @@ export function Calendar(props: CalendarProps) {
               Editar Ordem de Serviço
             </DialogTitle>
             <DialogClose
-              onClick={() => { setEditDialogOpen(false) }}
+              onClick={() => { setEditDialogOpen(false); props.fetchAssignedOrders() }}
               className="absolute right-6 top-6 hover:bg-purple-100 rounded-full">
               <FiX size={24} color='#5051F9' />
             </DialogClose>
