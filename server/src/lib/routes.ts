@@ -364,8 +364,15 @@ export async function appRoutes(app: FastifyInstance) {
       workersId: z.number().array()
     })
 
-    const { orderId, workersId } = updateData.parse(request.body) 
-    await conn.execute('UPDATE `service_orders` SET `assigned_workers_id` = ? WHERE `id` = ?', [workersId, orderId])
+    const { orderId, workersId } = updateData.parse(request.body)
+    const uniqueWid = new Set<number>()
+    workersId.forEach((worker) => {
+      if(!uniqueWid.has(worker)){
+        uniqueWid.add(worker)
+      }
+    })
+    const workersIdDb = Array.from(uniqueWid)
+    await conn.execute('UPDATE `service_orders` SET `assigned_workers_id` = ? WHERE `id` = ?', [workersIdDb, orderId])
   })
 
   app.post('/TimelineUpdateEventDate',async (request) => {

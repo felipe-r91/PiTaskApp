@@ -79,7 +79,6 @@ export function EditOS(props: FormProps) {
   }
 
   async function submitForm() {
-
     await api.post('/EditOrder', {
       orderId,
       workersToDelete,
@@ -113,8 +112,8 @@ export function EditOS(props: FormProps) {
   }
 
   function workersToAdd() {
-    const remainingWorkers = allWorkers.filter((worker) => !workers.some((w) => w.id === worker.id));
-    setAllWorkers(remainingWorkers)
+    //const remainingWorkers = allWorkers.filter((worker) => !workers.some((w) => w.id === worker.id));
+    //setAllWorkers(remainingWorkers)
   }
 
   function toogleAddWorker(id: number) {

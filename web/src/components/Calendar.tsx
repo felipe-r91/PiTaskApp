@@ -232,44 +232,26 @@ export function Calendar(props: CalendarProps) {
       }).then(() => alert('Atribuição Atualizada!'))
     },
 
-    onEventMove: (args: any) =>{
+    onEventMove: (args: any) => {
       const eventDataTag = args.e.data.tags[0]
-      ctrlEvent = args.ctrl
       orderId = Number(eventDataTag)
-      if(args.ctrl){
-        newEvent = new DayPilot.Event({
-          start: args.newStart,
-          end: args.newEnd,
-          text: 'Copy' + args.e.text(),
-          resource: args.newResource,
-          id: DayPilot.guid()
-        })
-
-      }
     },
     onEventRightClick: (args: any) => {
-      
+
     },
-     onEventMoved:(args: any) => {
-      if(!ctrlEvent){
-        const eventId = args.e.data.id.toString();
-        const resourceId = args.e.data.resource;
-        const newEventStart = args.newStart.value;
-        const newEventEnd = args.newEnd.value;
-        api.post('/CalendarEventMoved', {
-          eventId,
-          newEventStart,
-          newEventEnd,
-          resourceId,
-          orderId
-        }).then(() => alert('Atribuição atualizada!'));
-      } else {
-        alert('Evento copiado')
-        // to-do get the last eventId on db
-        // create new event
-        
-      }
-    }    
+    onEventMoved: (args: any) => {
+      const eventId = args.e.data.id.toString();
+      const resourceId = args.e.data.resource;
+      const newEventStart = args.newStart.value;
+      const newEventEnd = args.newEnd.value;
+      api.post('/CalendarEventMoved', {
+        eventId,
+        newEventStart,
+        newEventEnd,
+        resourceId,
+        orderId
+      }).then(() => alert('Atribuição atualizada!'));
+    }
   });
 
   const calendarRef = useRef<DayPilotCalendar>(null);
