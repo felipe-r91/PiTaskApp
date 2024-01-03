@@ -435,5 +435,34 @@ export async function appRoutes(app: FastifyInstance) {
     const workHours = diff/3600000
     await conn.execute('UPDATE assigned_os SET worker_hours = ?, start_date = ?, end_date = ? WHERE id = ?',[workHours,newEventStart, newEventEnd, eventId])
   })
+
+  app.get('/KpiPlanning', async () => {
+    dayjs.extend(weekOfYear)
+    const todayWeek = dayjs().week()
+
+    const [dbResponse] = await conn.execute('SELECT performed_hours, planned_hours FROM service_orders WHERE status = ? AND completed_at = ?', ['completed', todayWeek])
+    const plannedHoursArray = (dbResponse as RowDataPacket[]).map(row => row.planned_hours)
+    const perfomedHoursArray = (dbResponse as RowDataPacket[]).map(row => row.performed_hours)
+    const totalPlannedHours = plannedHoursArray.reduce((acc, currValue) => {
+      return acc += currValue
+    }, 0)
+    const totalPerformedHours = perfomedHoursArray.reduce((acc, currValue) => {
+      return acc += currValue
+    }, 0)
+    return {totalPlannedHours, totalPerformedHours}
+  })
+
+  app.get('/KpiResourceAllocation', async () => {
+    const currentDate = dayjs()
+    const daysUntilSunday = (currentDate.day() + 7 ) % 7
+    const firstDayOfWeek = currentDate.subtract(daysUntilSunday, 'day').startOf('day')
+    const lastDayOfWeek = firstDayOfWeek.add(6, 'days')
+    const queryFirstDay = firstDayOfWeek.format('YYYY-MM-DD').concat('T00:00:00')
+    const queryLastDay = lastDayOfWeek.format('YYYY-MM-DD').concat('T00:00:00')
+    console.log(queryFirstDay)
+    console.log(queryLastDay)
+
+    //const [dbResponse] = await conn.execute('SELECT ')
+  })
 }
 

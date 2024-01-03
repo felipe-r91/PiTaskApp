@@ -142,7 +142,7 @@ export function VisualizeOS(props: FormProps) {
                 </div>
               </div>
             </div>
-            <PlannedKPIChart planned_hours={orderDetails?.planned_hours} performed_hours={totalWorkedHours} />
+            <PlannedKPIChart planned_hours={orderDetails?.planned_hours} performed_hours={totalWorkedHours} label="Precisão" />
           </div>
         </div>
         <div className='w-[204px] pt-5 justify-center'>

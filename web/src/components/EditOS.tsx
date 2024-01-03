@@ -253,7 +253,7 @@ export function EditOS(props: FormProps) {
                         </div>
                       </div>
                     </div>
-                    <PlannedKPIChart planned_hours={orderDetails?.planned_hours} performed_hours={totalWorkedHours} />
+                    <PlannedKPIChart planned_hours={orderDetails?.planned_hours} performed_hours={totalWorkedHours} label="Precisão" />
                   </div>
                 </>
               }

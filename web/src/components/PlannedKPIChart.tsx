@@ -5,6 +5,7 @@ import ReactApexChart from "react-apexcharts";
 interface ChartProps{
   planned_hours?: number,
   performed_hours?: number[],
+  label: string
 }
 
 export function PlannedKPIChart(props : ChartProps){
@@ -117,7 +118,7 @@ export function PlannedKPIChart(props : ChartProps){
     stroke:{
       lineCap: 'round',
     },
-    labels: ['Precisão']
+    labels: [props.label]
   }
   
   

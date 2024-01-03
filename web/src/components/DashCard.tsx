@@ -26,7 +26,7 @@ export function DashCard(props: CardProps) {
               <div>{React.createElement(props.icon, { size: 24, color: '#8D98A9' })}</div>
             </div>
           </div>
-          <div className="text-gray-light text-base font-semibold pl-3">{props.title}</div>
+          <div className="text-purple-dark text-base font-semibold pl-3">{props.title}</div>
           <div className="text-dashboard-value text-xl font-bold pl-4">{props.mainValue}</div>
         </div>
         <div className="pl-5 pt-8">

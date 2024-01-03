@@ -1,39 +1,28 @@
-import { TbActivity, TbAlertTriangle, TbFileImport, TbFileReport, TbStar } from "react-icons/tb";
+import { TbActivity, TbAlertTriangle, TbBuildingFactory2, TbFileReport, TbTargetArrow } from "react-icons/tb";
 import { DashCard } from "./DashCard";
 import { OrdersChart } from "./OrdersChart";
-import { Reminder } from "./Reminder";
 import { DashRightMenu } from "./DashRightMenu";
 import { api } from "../lib/axios";
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 import weekOfYear from 'dayjs/plugin/weekOfYear';
 import { OsStatusChart } from "./OsStatusChart";
+import { DashCardGraph } from "./DashCardGraph";
 
-
-type Orders = {
-  id: number;
-  title: string;
-  costumer: string;
-  description: string;
-  created_at: Date;
-}[]
+type KpiPlanning = {
+  totalPlannedHours : number, 
+  totalPerformedHours: number
+}
 
 export function Dashboard() {
 
-  const [orders, setOrders] = useState<Orders>()
   const [ordersUnassignedCount, setOrdersUnassignedCount] = useState<number>(0)
+  const [KpiPlann, setKpiPlann] = useState<KpiPlanning>()
   const [newOrders, setNewOrders] = useState<number>(0)
   const [completedOrders, setCompletedOrders] = useState<number>(0)
-  const [completedOnWeek, setCompletedOnWeek] = useState<number>(0)
   const [assignedOrders, setAssignedOrders] = useState<number>(0)
   dayjs.extend(weekOfYear)
   const todayWeek = dayjs().week()
-
-  useEffect(() => {
-    api.get('/UnassignedOrders').then(response => {
-      setOrders(response.data)
-    })
-  }, [])
 
   useEffect(() => {
     api.get('/UnassignedOrdersCount').then(response => {
@@ -54,25 +43,29 @@ export function Dashboard() {
   }, [])
 
   useEffect(() => {
-    api.get('/CompletedOnWeek').then(response => {
-      setCompletedOnWeek(response.data)
-    })
-  }, [])
-
-  useEffect(() => {
     api.get('/AssignedOrdersCount').then(response => {
       setAssignedOrders(response.data)
     })
   }, [])
 
+  useEffect(() => {
+    api.get('/KpiPlanning').then(response => {
+     setKpiPlann(response.data)
+    })
+  }, [])
+
+  useEffect(() => {
+    api.get('/KpiResourceAllocation')
+  }, [])
+
   return (
-    <div className="flex h-[100vh]">
+    <div className="flex h-[100dvh]">
       <section className="w-full flex bg-off-white">
         <div>
           <div className="flex gap-8 pt-10 pl-10 pb-5">
-            <DashCard icon={TbStar} title={'Ordens Completas'} mainValue={completedOrders} svgStroke={'#5051F9'} kpiValue={completedOnWeek} kpiColor={'text-[#299702]'} link={'/OsStatus'} />
-            <DashCard icon={TbFileImport} title={'Novas Ordens'} mainValue={newOrders} svgStroke={'#1EA7FF'} kpiValue={newOrders} kpiColor={'text-[#1EA7FF]'} link={'/OsStatus '} />
             <DashCard icon={TbFileReport} title={'Ordens sem Atribuição'} mainValue={ordersUnassignedCount} svgStroke={'#F52104'} kpiValue={newOrders} kpiColor={'text-[#F52104]'} link={'/OsStatus'} />
+            <DashCardGraph icon={TbTargetArrow} title={`Planejamento S${todayWeek}`} label="Precisão" firstData={KpiPlann?.totalPlannedHours} secondData={KpiPlann?.totalPerformedHours}/>
+            <DashCardGraph icon={TbBuildingFactory2} title={`Utilização S${todayWeek}`} label="Total"/>
           </div>
           <div className="bg-off-white w-background-w grid col-span-3 h-fit pl-10 pt-4">
             <div className="bg-white w-graphic-w h-graphic-h rounded-2xl">
@@ -83,15 +76,6 @@ export function Dashboard() {
               <div className="h-60 w-graphic-w pl-10 pt-8">
                 <OrdersChart />
               </div>
-            </div>
-            <div className=" max-h-[270px] overflow-y-auto overflow-x-hidden scrollbar-hide mt-8">
-              {orders?.map((order) => (
-                <div
-                  key={order.id}
-                  className="bg-off-white w-background-w grid col-span-3 h-fit pb-8 gap-4">
-                  <Reminder soNumber={order.id} soTitle={order.title} soCostumer={order.costumer.substring(7, 30)} />
-                </div>
-              ))}
             </div>
           </div>
         </div>
