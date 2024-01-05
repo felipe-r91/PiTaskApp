@@ -70,7 +70,7 @@ export function Schedule() {
             </div>
             <Dialog.Root>
               <Dialog.Trigger>
-                <div className="absolute right-12 top-24">
+                <div className="absolute right-[1650px] top-[795px]">
                   <div className="w-fit h-fit bg-purple-light rounded-md">
                     <div className="px-2 py-1 flex items-center">
                       <TbPlus size={15} color='white' />

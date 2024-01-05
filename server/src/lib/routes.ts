@@ -4,6 +4,7 @@ import { registerUserController } from "./user/user.controller";
 import { userSchema } from "./user/user.schema";
 import dayjs from "dayjs";
 import weekOfYear from 'dayjs/plugin/weekOfYear';
+import isBetween from 'dayjs/plugin/isBetween';
 import { z } from "zod";
 import { conn } from './db/mysqlconnection';
 import { RowDataPacket } from "mysql2";
@@ -50,6 +51,14 @@ export async function appRoutes(app: FastifyInstance) {
     return dbResponse;
   })
   app.get('/NewOrders', async () => {
+    const [dbResponse] = await conn.execute('SELECT id, created_at FROM service_orders')
+    return dbResponse;
+  })
+  app.get('/CompletedOrders', async () => {
+    const [dbResponse] = await conn.execute('SELECT id, completed_at FROM service_orders WHERE status = ?', ['completed'])
+    return dbResponse;
+  })
+  app.get('/NewOrdersCount', async () => {
     const [dbResponse] = await conn.execute('SELECT id FROM `service_orders` WHERE `status` = ?', ['new'],); 
     let result = Object.values(JSON.parse(JSON.stringify(dbResponse)));
     var total = 0;
@@ -93,7 +102,7 @@ export async function appRoutes(app: FastifyInstance) {
     return total;
   })
 
-  app.get('/CompletedOrders', async () => {
+  app.get('/CompletedOrdersCount', async () => {
     const [dbResponse] = await conn.execute('SELECT id FROM `service_orders` WHERE `status` = ?', ['completed'],); 
     let result = Object.values(JSON.parse(JSON.stringify(dbResponse)));
     var total = 0;
@@ -330,7 +339,32 @@ export async function appRoutes(app: FastifyInstance) {
   })
 
   app.get('/TodayAgenda',async () => {
-    //to-do
+    const todayZeroHour = dayjs().format('YYYY-MM-DD').concat('T00:00:00')
+    const todayLastHour = dayjs().format('YYYY-MM-DD').concat('T23:59:00')
+    const query = 'SELECT DISTINCT assigned_os.order_id, assigned_os.worker_id, service_orders.costumer FROM assigned_os JOIN service_orders ON assigned_os.order_id = service_orders.id WHERE assigned_os.start_date >= ? AND assigned_os.end_date <= ? AND service_orders.status <> ?'
+    const [dbResponse] = await conn.execute(query, [todayZeroHour, todayLastHour, 'completed'])
+    const aggregatedResults: Record<number, { orderId: number; costumer: string; workersId: number[] }> = {};
+
+    (dbResponse as RowDataPacket[]).forEach(item => {
+      const { order_id, costumer, worker_id } = item;
+    
+      // If orderId is not in the aggregatedResults object, create an entry
+      if (!aggregatedResults[order_id]) {
+        aggregatedResults[order_id] = {
+          orderId: order_id,
+          costumer: costumer,
+          workersId: [worker_id],
+        };
+      } else {
+        // If orderId is already in the object, push the worker_id to the workersId array
+        aggregatedResults[order_id].workersId.push(worker_id);
+      }
+    });
+    
+    // Convert the object values into an array
+    const resultArray = Object.values(aggregatedResults);
+    
+    return resultArray;
   })
 
   app.post('/EditOrder',async (request) => {
@@ -459,10 +493,32 @@ export async function appRoutes(app: FastifyInstance) {
     const lastDayOfWeek = firstDayOfWeek.add(6, 'days')
     const queryFirstDay = firstDayOfWeek.format('YYYY-MM-DD').concat('T00:00:00')
     const queryLastDay = lastDayOfWeek.format('YYYY-MM-DD').concat('T00:00:00')
-    console.log(queryFirstDay)
-    console.log(queryLastDay)
+    const query = 'SELECT worker_id, SUM(worker_hours) as total_hours FROM assigned_os WHERE start_date BETWEEN ? AND ? GROUP BY worker_id'
+    const [dbResponse] = await conn.execute(query, [queryFirstDay, queryLastDay])
+    const result = (dbResponse as RowDataPacket[]).map(row => ({
+      workerId: row.worker_id,
+      totalHours: row.total_hours
+    }))
+    return result;
+  })
 
-    //const [dbResponse] = await conn.execute('SELECT ')
+  app.get('/FinishThisWeek', async () => {
+
+    const currentDate = dayjs()
+    const daysUntilSunday = (currentDate.day() + 7) % 7
+    const firstDayOfWeek = currentDate.subtract(daysUntilSunday, 'day').startOf('day')
+    const lastDayOfWeek = firstDayOfWeek.add(6, 'days')
+    const latestEndDateQuery = 'SELECT order_id, MAX(end_date) AS latest_end_date FROM assigned_os GROUP BY order_id';
+    const [latestEndDateResult] = await conn.execute(latestEndDateQuery);
+    const ordersToFinish = (latestEndDateResult as RowDataPacket[]).map(order => {
+      dayjs.extend(isBetween)
+      if(dayjs(order.latest_end_date).isBetween(dayjs(firstDayOfWeek), dayjs(lastDayOfWeek), 'day', '[]')){
+        return order.order_id
+      } else {
+        return null
+      }
+    }).filter(orderId => orderId !== null)
+    return ordersToFinish
   })
 }
 

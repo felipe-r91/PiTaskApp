@@ -54,8 +54,6 @@ export function Calendar(props: CalendarProps) {
   const [orderToDisplay, setOrderToDisplay] = useState<Order>()
   const [startDateCal, setStartDateCal] = useState<DayPilot.Date>(new DayPilot.Date().getDatePart())
   let orderId: number
-  let ctrlEvent: boolean
-  let newEvent: DayPilot.Event
 
   function buColor(orderBu: string) {
     switch (orderBu) {
@@ -236,7 +234,7 @@ export function Calendar(props: CalendarProps) {
       const eventDataTag = args.e.data.tags[0]
       orderId = Number(eventDataTag)
     },
-    onEventRightClick: (args: any) => {
+    onEventRightClick: () => {
 
     },
     onEventMoved: (args: any) => {

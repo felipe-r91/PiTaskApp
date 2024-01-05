@@ -6,59 +6,71 @@ import weekOfYear from 'dayjs/plugin/weekOfYear';
 import { api } from "../lib/axios";
 import { useEffect, useState } from "react";
 
+type Order = {
+  id: number;
+  created_at: number;
+  completed_at: number;
+}
 
 
-export function OrdersChart(){
+export function OrdersChart() {
   //Intialize arrays
   //Array with week number + "S" letter
-  const weeks: string [] = []
+  const weeks: string[] = []
   //Array to store week numbers
-  const weekNumbers: number [] = []
-  //Array to store new orders created on the actual week
-  const newOrdersByWeek : number [] = []
-  //Array to store completed orders on the actual week
-  const completedOrdersByWeek : number [] = []
-  //States to render chart
-  const [chartSeries1, setChartSeries1] = useState<number[]>([])
-  const [chartSeries2, setChartSeries2] = useState<number[]>([])
-  //Plugin dayjs to get actual week number
-  dayjs.extend(weekOfYear)
-  const todayWeek = dayjs().week()
+  const weekNumbers: number[] = []
+  //Array to store new orders
+  const [newOrdersCount, setNewOrdersCount] = useState<number[]>([]);
+  //Array to store completed orders
+  const [completedOrdersCount, setCompletedOrdersCount] = useState<number[]>([])
+
   //Loop to get 10 week numbers on the past
-  for (var index = 10; index > 0 ; index--) {
-    var weekNumber = (todayWeek+1) - index
+  for (var i = 9; i >= 0; i--) {
+    const date = dayjs().subtract(i, 'week')
+    dayjs.extend(weekOfYear)
+    const weekNumber = dayjs(date).week()
     weekNumbers.push(weekNumber);
   }
   //Loop do add "S" letter to week numbers
-  for (var index = 0; index < weekNumbers.length ; index++){
+  for (var index = 0; index < weekNumbers.length; index++) {
     var weekString = weekNumbers[index].toString()
     const text = 'S'
     var result = text.concat(weekString)
     weeks.push(result)
   }
- //Loop to get new orders and completed orders on the 10 weeks
-  for(var index = 0; index < weekNumbers.length; index++){
-      api.get('/WeeklyNewOrders', {
-        params:{
-          weekNumber: weekNumbers[index]
-        }
-      }).then(response => {
-        newOrdersByWeek.push(response.data)
-      })
 
-      api.get('/WeeklyCompletedOrders', {
-        params:{
-          weekNumber : weekNumbers[index]
+  useEffect(() => {
+    api.get('/NewOrders').then(response => {
+      const countArray = calculateOrdersCount(response.data, weekNumbers, true);
+      setNewOrdersCount(countArray);
+    })
+  }, [])
+
+  useEffect(() => {
+    api.get('/CompletedOrders').then(response => {
+      const countArray = calculateOrdersCount(response.data, weekNumbers, false);
+      setCompletedOrdersCount(countArray);
+    })
+  }, [])
+
+  function calculateOrdersCount(orders: Order[], weeks: number[], isNew: boolean): number[] {
+    const ordersCount: number[] = Array(weeks.length).fill(0);
+
+    orders.forEach((order) => {
+      if (isNew) {
+        const weekIndex = weeks.findIndex((week) => order.created_at === week);
+        if (weekIndex !== -1) {
+          ordersCount[weekIndex]++;
         }
-      }).then(response => {
-        completedOrdersByWeek.push(response.data)
-      })
-    }
-    //Set states to render chart
-    useEffect(() =>{
-      setChartSeries1(newOrdersByWeek)
-      setChartSeries2(completedOrdersByWeek)
-    }, [])
+      } else {
+        const weekIndex = weeks.findIndex((week) => order.completed_at === week);
+        if (weekIndex !== -1) {
+          ordersCount[weekIndex]++;
+        }
+      }
+    });
+    return ordersCount;
+  };
 
   //Chart options, documentation on apexcharts
   const chartData: ApexOptions = {
@@ -68,25 +80,26 @@ export function OrdersChart(){
       toolbar: {
         show: false
       },
-      
+
     },
     series: [{
       name: 'Ordens Criadas',
-      data: chartSeries1},
-      {
-        name:'Ordens Completas',
-        data: chartSeries2,
-      },
+      data: newOrdersCount
+    },
+    {
+      name: 'Ordens Completas',
+      data: completedOrdersCount,
+    },
     ],
-    
+
     dataLabels: {
       enabled: false,
-      
+
     },
     stroke: {
       curve: 'smooth',
-      width:1
-      
+      width: 1
+
     },
     markers: {
       size: 3.5,
@@ -110,54 +123,55 @@ export function OrdersChart(){
       }
     },
     xaxis: {
-      labels:{
-        style:{
+      labels: {
+        style: {
           fontFamily: 'DM sans',
           colors: '#768396',
-          fontSize:'12px'
+          fontSize: '12px'
         }
       },
       type: 'category',
       categories: weeks
-      
+
     },
     tooltip: {
       x: {
         format: 'Month'
       },
     },
-    yaxis:{
+    yaxis: {
       labels: {
-        style:{
+        style: {
           fontFamily: 'DM sans',
-          colors:'#768396',
+          colors: '#768396',
           fontSize: '12px'
         }
       }
     },
-    grid:{
-      xaxis:{
-        lines:{
+    grid: {
+      xaxis: {
+        lines: {
           show: false
         }
       },
-      yaxis:{
-        lines:{
-          show:true
+      yaxis: {
+        lines: {
+          show: true
         }
       }
     },
-    legend:{
-      show:true,
+    legend: {
+      show: true,
       fontFamily: 'DM sans',
       fontSize: '10px'
-      
+
     },
   };
-    //return chart object
-    return (<ReactApexChart key={chartData.series?.length} options={chartData} series={chartData.series} type='area' height={244} width={771} />)
-  
-  }
+  //return chart object
+  return (
+  <ReactApexChart key={chartData.series?.length} options={chartData} series={chartData.series} type='area' height={244} width={771} />)
 
-  
+}
+
+
 
