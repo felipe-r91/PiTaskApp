@@ -426,7 +426,7 @@ export function TimelineScheduler(props: Props) {
           </button>
         }
       </div>
-      {scrollPosition > 60 &&
+      {scrollPosition > 50 &&
         <div className="z-10 flex pl-[255px] w-[100%] pr-[22px] gap-2">
           {days.map((day, index) =>
             <div
@@ -440,7 +440,8 @@ export function TimelineScheduler(props: Props) {
       }
       <div className="px-5 pt-2 min-w-fit">
         <div className="flex">
-          <div className="max-h-[900px] overflow-auto scrollbar-hide" onScroll={handleScroll}>
+          <div className="max-h-[730px] overflow-auto scrollbar-hide" onScroll={handleScroll}>
+            <div className="grid">
             <div className="flex">
               <div className="pt-[60px] gap-2">
                 {props.workers?.map(worker =>
@@ -459,6 +460,8 @@ export function TimelineScheduler(props: Props) {
                 ref={timetableRef}
                 events={events}
               />
+            </div>
+            <div className="bg-off-white h-32 w-full mt-[-120px] z-10"></div>
             </div>
           </div>
         </div>

@@ -7,6 +7,7 @@ import { OsStatus } from './components/OsStatus';
 import { Timeline } from './components/Timeline';
 import { NewUser } from './components/NewUser';
 import { SideNav } from './components/SideNav';
+import { Broadcast } from './components/Broadcast';
 
 export function App() {
 
@@ -24,6 +25,7 @@ export function App() {
             <Route path='/OsStatus' element={<OsStatus />} />
             <Route path='/Schedule' element={<Schedule />} />
             <Route path='/NewUser' element={<NewUser />} />
+            <Route path='/Broadcast' element={<Broadcast/>} />
           </Routes>
         </div>
       </div>
