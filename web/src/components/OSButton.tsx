@@ -39,15 +39,15 @@ export function OSButton(props: OSProps){
 
   return (
     <div>
-    <button type='button' onClick={() => setIsShowing((isShowing)=> !isShowing)} title='Order details' className="flex w-80 h-16 bg-purple-light rounded-xl shadow-custom justify-between items-center px-4 transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-110">
+    <button type='button' onClick={() => setIsShowing(!isShowing)} title='Order details' className="flex w-80 h-16 bg-purple-light rounded-xl shadow-custom justify-between items-center px-4 transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-110">
       <div className=" text-white text-xl font-semibold">OS {props.soNumber} - {props.soCostumer}</div>
     </button>
     <Transition
       show={isShowing}
-      enter="transition-opacity duration-150"
+      enter="ease-out duration-[1000ms]"
       enterFrom="opacity-0"
       enterTo="opacity-100"
-      leave="transition-opacity duration-150"
+      leave="ease-in duration-[450ms]"
       leaveFrom="opacity-100"
       leaveTo="opacity-0"
     >

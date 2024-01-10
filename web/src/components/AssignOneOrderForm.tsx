@@ -101,10 +101,6 @@ export function AssignOneOrderForm(props: FormProps) {
     setOsAnnotation(annotation)
   }
 
-  function controlBackButton(){
-
-  }
-
   async function assignOrder(event: FormEvent) {
     event.preventDefault()
     if (osWorker.length === 0) {

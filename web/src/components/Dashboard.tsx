@@ -22,6 +22,7 @@ type OrderDetails = {
   id: number;
   bu: string;
   costumer: string;
+  status: string;
 }
 
 export function Dashboard() {
@@ -138,11 +139,12 @@ export function Dashboard() {
   const KpiResourceData1 = getAllWeekWorkedHours(KpiResource)
 
   return (
+    
     <div className="flex h-[100dvh]">
       <section className="w-full bg-off-white">
         <div className="flex">
           <div>
-            <div className="flex gap-8 pt-10 pl-10 pb-5">
+            <div className="flex gap-8 pt-20 pl-10 pb-5">
               <DashCard icon={TbFileReport} title={'Ordens sem Atribuição'} mainValue={ordersUnassignedCount} svgStroke={'#F52104'} kpiValue={newOrders} kpiColor={'text-[#F52104]'} link={'/OsStatus'} />
               <DashCardGraph icon={TbTargetArrow} title={`Planejamento S${todayWeek}`} label="Precisão" firstData={KpiPlann?.totalPlannedHours} secondData={KpiPlann?.totalPerformedHours} />
               <DashCardGraph icon={TbBuildingFactory2} title={`Utilização S${todayWeek}`} label="Total" firstData={KpiResourceData1} secondData={(workersNumber * 44)} />
@@ -160,7 +162,7 @@ export function Dashboard() {
             </div>
           </div>
           <div className="flex justify-center w-full">
-            <div className="pt-10">
+            <div className="pt-20">
               <div>
                 <div className="bg-white rounded-xl h-[280px] w-[430px]">
                   <div className="text-purple-dark font-bold text-xl pl-8 pt-6 flex gap-5 items-center">
@@ -196,10 +198,10 @@ export function Dashboard() {
                     <div className="bg-[#E8EDF1] h-line-h w-[400px]"></div>
                   </div>
                   {showData ? (
-                    <div className=" justify-center items-center grid pt-5 max-h-[200px] overflow-auto scrollbar-hide">
+                    <div className="justify-center items-center grid pt-5 max-h-[200px] overflow-auto scrollbar-hide">
                       {orderDetails.map((order) => (
-                        <div key={order.id} className="pt-5">
-                          <div className="flex gap-3">
+                        <div key={order.id} className={`pt-5 ${order.status === 'completed' ? 'line-through text-purple-dark' : ''}`}>
+                          <div className={`flex gap-3 ${order.status === 'completed' ? 'opacity-60' : ''}`}>
                             <div className="text-purple-light font-semibold bg-[#EDECFE] w-14 flex justify-center h-6 rounded-md">{order.id}</div>
                             <div className={`${buColor(order.bu)} flex justify-center w-8 rounded-md`}>{order.bu}</div>
                             <div className="text-[#8D98A9]">{order.costumer.substring(7, 30)}</div>

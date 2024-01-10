@@ -17,7 +17,8 @@ export function App() {
       <div className='flex'>
         <SideNav />
         <div className='w-full'>
-          <Header />
+          {//<Header />
+          }
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path='/Dashboard' element={<Dashboard />} />

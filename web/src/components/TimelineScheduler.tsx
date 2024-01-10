@@ -46,7 +46,7 @@ export function TimelineScheduler(props: Props) {
   const [scrollPosition, setScrollPosition] = useState(0);
   const [days, setDays] = useState<string[]>([]);
   const [viewType, setViewType] = useState('Week')
-  const [headerDateFormat, setHeaderDateFormat] = useState('dddd d/M/yyyy')
+  const [headerDateFormat, setHeaderDateFormat] = useState('dddd dd/MM/yyyy')
   const [isConcludeDialogOpen, setConcludeDialogOpen] = useState(false)
   const [isVisualizeDialogOpen, setVisualizeDialogOpen] = useState(false)
   const [isEditDialogOpen, setEditDialogOpen] = useState(false)
@@ -338,6 +338,12 @@ export function TimelineScheduler(props: Props) {
         nameToUpdate,
         orderId
       }).then(() => alert('Atribuição atualizada!'))
+    },
+
+    onEventClicked:(args: any) => {
+      const startDate = args.e.start()
+      const endDate = args.e.end()
+      alert(`Início do Evento: ${startDate.toString('dd/MM/yyyy')}\nFinal do Evento: ${endDate.toString('dd/MM/yyyy')}`)
     }
   };
 
@@ -468,8 +474,8 @@ export function TimelineScheduler(props: Props) {
       </div>
       <Dialog open={isConcludeDialogOpen}>
         <DialogPortal>
-          <DialogOverlay className="bg-black opacity-60 data-[state=open]:animate-overlayShow fixed inset-0" />
-          <DialogContent className="data-[state=open]:animate-contentShow fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[1090px] translate-x-[-50%] translate-y-[-50%] rounded-[12px] p-6 bg-white shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] focus:outline-none">
+          <DialogOverlay className="bg-black opacity-60 data-[state=open]:animate-overlayShow fixed inset-0 z-20" />
+          <DialogContent className="data-[state=open]:animate-contentShow fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[1090px] translate-x-[-50%] translate-y-[-50%] rounded-[12px] p-6 bg-white shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] focus:outline-none z-30">
             <DialogTitle className="m-0 text-[30px] font-medium flex items-center gap-7">
               Concluir Ordem de Serviço
             </DialogTitle>
@@ -484,8 +490,8 @@ export function TimelineScheduler(props: Props) {
       </Dialog>
       <Dialog open={isVisualizeDialogOpen}>
         <DialogPortal>
-          <DialogOverlay className="bg-black opacity-60 data-[state=open]:animate-overlayShow fixed inset-0" />
-          <DialogContent className="data-[state=open]:animate-contentShow fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[1090px] translate-x-[-50%] translate-y-[-50%] rounded-[12px] p-6 bg-white shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] focus:outline-none">
+          <DialogOverlay className="bg-black opacity-60 data-[state=open]:animate-overlayShow fixed inset-0 z-20" />
+          <DialogContent className="data-[state=open]:animate-contentShow fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[1090px] translate-x-[-50%] translate-y-[-50%] rounded-[12px] p-6 bg-white shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] focus:outline-none z-30">
             <DialogTitle className="m-0 text-[30px] font-medium flex items-center gap-7">
               Visualizar Ordem de Serviço
             </DialogTitle>
@@ -500,8 +506,8 @@ export function TimelineScheduler(props: Props) {
       </Dialog>
       <Dialog open={isEditDialogOpen}>
         <DialogPortal>
-          <DialogOverlay className="bg-black opacity-60 data-[state=open]:animate-overlayShow fixed inset-0" />
-          <DialogContent className="data-[state=open]:animate-contentShow fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[1090px] translate-x-[-50%] translate-y-[-50%] rounded-[12px] p-6 bg-white shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] focus:outline-none">
+          <DialogOverlay className="bg-black opacity-60 data-[state=open]:animate-overlayShow fixed inset-0 z-20" />
+          <DialogContent className="data-[state=open]:animate-contentShow fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[1090px] translate-x-[-50%] translate-y-[-50%] rounded-[12px] p-6 bg-white shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] focus:outline-none z-30">
             <DialogTitle className="m-0 text-[30px] font-medium flex items-center gap-7">
               Editar Ordem de Serviço
             </DialogTitle>

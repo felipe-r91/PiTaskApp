@@ -215,7 +215,7 @@ export function Calendar(props: CalendarProps) {
     onEventClicked:(args: any) => {
       const startDate = args.e.start()
       const endDate = args.e.end()
-      alert(`Início do Evento: ${startDate.toString('d/M/yyyy HH:mm')}\nFinal do Evento: ${endDate.toString('d/M/yyyy HH:mm')}`)
+      alert(`Início do Evento: ${startDate.toString('dd/MM/yyyy HH:mm')}\nFinal do Evento: ${endDate.toString('dd/MM/yyyy HH:mm')}`)
     },
 
     onEventResized: (args : any) => {
@@ -234,9 +234,7 @@ export function Calendar(props: CalendarProps) {
       const eventDataTag = args.e.data.tags[0]
       orderId = Number(eventDataTag)
     },
-    onEventRightClick: () => {
-
-    },
+    
     onEventMoved: (args: any) => {
       const eventId = args.e.data.id.toString();
       const resourceId = args.e.data.resource;
