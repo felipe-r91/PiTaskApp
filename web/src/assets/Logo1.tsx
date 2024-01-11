@@ -1,4 +1,4 @@
-import logo from '/src/assets/TASKGO!.png'
+import logo from '/src/assets/TASKGO!login.png'
 
 interface LogoProps {
  width?: number;

@@ -21,8 +21,10 @@ export function SideNav() {
 
   return (
 
-    <div className="bg-[#FBFAFF] min-w-[70px] flex flex-col items-center">
-      <Logo />
+    <div className="bg-[#FBFAFF] min-w-[80px] flex flex-col items-center">
+      <div className='mt-5 mx-2'>
+      <Logo width={70}/>
+      </div>
       <div className="mt-20 flex flex-col gap-8">
         {menus?.map((menu, i) => (
           <Link
@@ -40,7 +42,7 @@ export function SideNav() {
           </Link>
         ))}
       </div>
-      <div className='pt-36'>
+      <div className='pt-28'>
       <AvatarColab width={'w-[45px]'} height={'h-[45px]'} img={'felipe.png'} name={'felipe'}/>
       </div>
     </div>
