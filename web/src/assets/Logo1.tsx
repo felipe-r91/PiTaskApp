@@ -6,7 +6,7 @@ interface LogoProps {
 
 export function Logo( props: LogoProps){
   return(
-    <div className='h-fit w-fit'>
+    <div>
       <img
         //style={{marginLeft:4, marginTop:10, width:50}}
         title='logo' 

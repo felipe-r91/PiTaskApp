@@ -43,7 +43,7 @@ export async function appRoutes(app: FastifyInstance) {
   })
 
   app.get('/workers', async () => {
-    const [dbResponse] = await conn.execute('SELECT id, name, surname, role, email, photo, color FROM `users`');
+    const [dbResponse] = await conn.execute('SELECT * FROM `users`');
     return dbResponse;
   })
   app.get('/AllOrders',async () => {

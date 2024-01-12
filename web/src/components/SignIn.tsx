@@ -4,12 +4,14 @@ import { ChangeEvent, useState } from "react";
 import '../styles/uploadPhoto.css';
 import { api } from "../lib/axios";
 import { Logo } from "../assets/Logo1";
+import { useNavigate } from "react-router-dom";
 
 
-export function NewUser() {
+export function SignIn() {
 
   const [currentImage, setCurrentImage] = useState<File>();
   const [previewImage, setPreviewImage] = useState<string>('/src/assets/uploads/user.png')
+  const nav = useNavigate()
 
 
   function handleCancel() {
@@ -210,9 +212,9 @@ export function NewUser() {
                   />
                 </fieldset>
                 <div className="flex pt-52 gap-6 w-full justify-center">
-                  <button type="reset" title="cancel" onClick={handleCancel}
+                  <button type="reset" title="cancel" onClick={() => {handleCancel; nav('/')}}
                     className='w-20 h-10 rounded-lg bg-[#EDECFE]  text-[#5051F9] hover:bg-[#5051F9] hover:text-white font-medium text-base flex items-center justify-center'>
-                    Cancelar
+                    Voltar
                   </button>
                   <button type="submit" title="save"
                     className='w-20 h-10 rounded-lg bg-[#EDECFE]  text-[#5051F9] hover:bg-[#5051F9] hover:text-white font-medium text-base flex items-center justify-center'>

@@ -1,9 +1,10 @@
+import { Link } from "react-router-dom";
 import { Logo } from "../assets/Logo1";
 
 
 export function Login() {
   return (
-    <div className="h-[100dvh] w-full bg-white">
+    <div className="h-[100dvh] w-full bg-off-white">
       <div className="pt-14 pl-36">
         <Logo width={100} />
       </div>
@@ -30,7 +31,7 @@ export function Login() {
               >
               </input>
             </fieldset>
-            <div className="text-purple-light pt-3">Esqueceu a senha?</div>
+            <a className="text-purple-light pt-3 hover:underline" href="/Test">Esqueceu a senha?</a>
             <div className="flex justify-center pt-5">
               <button type="submit" className="w-[300px] h-[50px] flex justify-center items-center bg-[#EDECFE] text-xl text-[#5051F9] hover:bg-[#5051F9] hover:text-white rounded-xl">
                 Login
@@ -44,9 +45,9 @@ export function Login() {
           <div className="text-purple-dark text-[17px]">
             Novo no TaskGO!?
           </div>
-          <div className="text-[#0a66c2] text-[17px]">
+          <a className="text-purple-light hover:underline text-[17px]" href="/SignIn">
             Cadastre-se
-          </div>
+          </a>
         </div>
 
       </div>
