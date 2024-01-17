@@ -33,6 +33,16 @@ export async function appRoutes(app: FastifyInstance) {
     return 'helooo'
   })
 
+  app.post('/userLogin', async (request) => {
+    const userData = z.object({
+      user: z.string(),
+      password: z.string()
+    })
+
+    const { user, password } = userData.parse(request.body)
+    console.log(user, password)
+  })
+
   app.withTypeProvider<ZodTypeProvider>().route({
     method: 'POST',
     url: '/profile',

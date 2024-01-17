@@ -110,7 +110,7 @@ export function SignIn() {
                       id="name"
                       onChange={formik.handleChange}
                       value={formik.values.name}
-                      className="text-[#768396] bg-off-white shadow-[#E5E5ED] focus:shadow-purple-light inline-flex h-[45px] w-[360px] flex-1 items-center justify-center rounded-[4px] px-[10px] py-2 text-[15px] leading-tight shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
+                      className="text-[#768396] bg-white shadow-[#E5E5ED] focus:shadow-purple-light inline-flex h-[45px] w-[360px] flex-1 items-center justify-center rounded-xl px-[10px] py-2 text-[15px] leading-tight shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
                       required
                       placeholder="Ex. Paulo"
                     />
@@ -124,7 +124,7 @@ export function SignIn() {
                       id="surname"
                       onChange={formik.handleChange}
                       value={formik.values.surname}
-                      className="text-[#768396] bg-off-white shadow-[#E5E5ED] focus:shadow-purple-light inline-flex h-[45px] w-[360px] flex-1 items-center justify-center rounded-[4px] px-[10px] py-2 text-[15px] leading-tight shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
+                      className="text-[#768396] bg-white shadow-[#E5E5ED] focus:shadow-purple-light inline-flex h-[45px] w-[360px] flex-1 items-center justify-center rounded-xl px-[10px] py-2 text-[15px] leading-tight shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
 
                       placeholder="Ex. Silva"
                     />
@@ -137,7 +137,7 @@ export function SignIn() {
                       type="password"
                       id="password"
                       name="password"
-                      className='text-[#768396] shadow-[#E5E5ED] bg-off-white focus:shadow-purple-light inline-flex h-[45px] w-[360px] flex-1 items-center justify-center rounded-[4px] px-[10px] py-2 text-[15px] leading-tight shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]'
+                      className='text-[#768396] shadow-[#E5E5ED] bg-white focus:shadow-purple-light inline-flex h-[45px] w-[360px] flex-1 items-center justify-center rounded-xl px-[10px] py-2 text-[15px] leading-tight shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]'
                       onChange={formik.handleChange}
                       value={formik.values.password}
                       placeholder="8 caracteres, uma maiúscula e um caracter especial"
@@ -155,7 +155,7 @@ export function SignIn() {
                       type="password"
                       id="confirmPWD"
                       name="confirmPWD"
-                      className='text-[#768396] shadow-[#E5E5ED] bg-off-white focus:shadow-purple-light inline-flex h-[45px] w-[360px] flex-1 items-center justify-center rounded-[4px] px-[10px] py-2 text-[15px] leading-tight shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]'
+                      className='text-[#768396] shadow-[#E5E5ED] bg-white focus:shadow-purple-light inline-flex h-[45px] w-[360px] flex-1 items-center justify-center rounded-xl px-[10px] py-2 text-[15px] leading-tight shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]'
                       onChange={formik.handleChange}
                       value={formik.values.confirmPWD}
                       placeholder="Confirme o Password"
@@ -179,7 +179,7 @@ export function SignIn() {
                     id="email"
                     onChange={formik.handleChange}
                     value={formik.values.email}
-                    className="text-[#768396] shadow-[#E5E5ED] bg-off-white focus:shadow-purple-light inline-flex h-[45px] w-[360px] flex-1 items-center justify-center rounded-[4px] px-[10px] py-2 text-[15px] leading-tight shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
+                    className="text-[#768396] shadow-[#E5E5ED] bg-white focus:shadow-purple-light inline-flex h-[45px] w-[360px] flex-1 items-center justify-center rounded-xl px-[10px] py-2 text-[15px] leading-tight shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
                     placeholder="example@google.com"
                   />
                 </fieldset>
@@ -192,7 +192,7 @@ export function SignIn() {
                     id="role"
                     onChange={formik.handleChange}
                     value={formik.values.role}
-                    className="text-[#768396] shadow-[#E5E5ED] bg-off-white focus:shadow-purple-light inline-flex h-[45px] w-[360px] flex-1 items-center justify-center rounded-[4px] px-[10px] py-2 text-[15px] leading-tight shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
+                    className="text-[#768396] shadow-[#E5E5ED] bg-white focus:shadow-purple-light inline-flex h-[45px] w-[360px] flex-1 items-center justify-center rounded-xl px-[10px] py-2 text-[15px] leading-tight shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
                     placeholder="Ex. Técnico de Refrigeração"
                     required
                   />
@@ -206,7 +206,7 @@ export function SignIn() {
                     id="phone"
                     onChange={formik.handleChange}
                     value={formik.values.phone}
-                    className="text-[#768396] shadow-[#E5E5ED] bg-off-white focus:shadow-purple-light inline-flex h-[45px] w-[360px] flex-1 items-center justify-center rounded-[4px] px-[10px] py-2 text-[15px] leading-tight shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
+                    className="text-[#768396] shadow-[#E5E5ED] bg-white focus:shadow-purple-light inline-flex h-[45px] w-[360px] flex-1 items-center justify-center rounded-xl px-[10px] py-2 text-[15px] leading-tight shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
                     placeholder="Ex. (DDD) 998989087"
                     required
                   />

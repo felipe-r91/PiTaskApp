@@ -1,15 +1,29 @@
-import { Link } from "react-router-dom";
 import { Logo } from "../assets/Logo1";
+import { useState } from "react";
+import { api } from "../lib/axios";
 
 
 export function Login() {
+
+  const [user, setUser] = useState('')
+  const [password, setPassword] = useState('')
+
+  async function submitForm(){
+    //to-do hash password before sending
+    await api.post('/userLogin', {
+      user,
+      password,
+    })
+    
+  }
+
   return (
     <div className="h-[100dvh] w-full bg-off-white">
       <div className="pt-14 pl-36">
         <Logo width={100} />
       </div>
       <div className="flex items-center justify-center">
-        <form className="w-[500px] h-[600px] mt-[-40px] bg-white shadow-xl rounded-2xl border border-[#E5E5ED] justify-center">
+        <form onSubmit={submitForm} className="w-[500px] h-[600px] mt-[-40px] bg-white shadow-xl rounded-2xl border border-[#E5E5ED] justify-center">
           <div className="text-6xl text-purple-dark flex justify-center font-semibold pt-10">Entrar</div>
           <div className="flex justify-self-auto pt-5 px-10">Agilize suas ordens, conquiste eficiência. Tenha em suas</div>
           <div className="flex justify-center">mãos a solução para a gestão de serviços</div>
@@ -19,6 +33,8 @@ export function Login() {
               <input className="w-[400px] rounded-xl text-[#768396] shadow-[#E5E5ED] focus:shadow-purple-light inline-flex h-[55px] flex-1 items-center justify-center px-[10px] text-[20px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
                 type="text"
                 id="username"
+                autoComplete="off"
+                onChange={e => setUser(e.target.value)}
                 required
               >
               </input>
@@ -26,12 +42,14 @@ export function Login() {
             <fieldset className="grid justify-items-start gap-2">
               <label htmlFor="password" className="text-purple-dark text-lg font-semibold">Senha</label>
               <input className="w-[400px] rounded-xl text-[#768396] shadow-[#E5E5ED] focus:shadow-purple-light inline-flex h-[55px] flex-1 items-center justify-center px-[10px] text-[20px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
-                type="text"
+                type="password"
                 id="password"
+                autoComplete="off"
+                onChange={e => setPassword(e.target.value)}
               >
               </input>
             </fieldset>
-            <a className="text-purple-light pt-3 hover:underline" href="/Test">Esqueceu a senha?</a>
+            <a className="text-purple-light pt-3 hover:underline w-fit" href="/Test">Esqueceu a senha?</a>
             <div className="flex justify-center pt-5">
               <button type="submit" className="w-[300px] h-[50px] flex justify-center items-center bg-[#EDECFE] text-xl text-[#5051F9] hover:bg-[#5051F9] hover:text-white rounded-xl">
                 Login
@@ -49,7 +67,6 @@ export function Login() {
             Cadastre-se
           </a>
         </div>
-
       </div>
     </div>
   )
