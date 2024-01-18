@@ -3,8 +3,8 @@ import * as Avatar from '@radix-ui/react-avatar';
 interface AvatarColabProps{
   width: string;
   height: string;
-  img: string;
-  name: string;
+  img?: string;
+  name?: string;
   surname?: string;
 }
 

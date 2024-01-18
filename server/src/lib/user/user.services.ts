@@ -6,17 +6,14 @@ import { conn } from '../db/mysqlconnection';
 
 export async function createUser(body: CreateUserSchema) {
 
-  const { name, surname, role, email, password, photo } = body
+  const { name, surname, role, email, password, photo, phone } = body
 
   const { hashedPass } = hashPass(password)
-  const { userColor } = randomColor()
+  
+  const data = { name, surname, role, email, password: hashedPass, photo, phone }
 
-  const data = { name, surname, role, email, password: hashedPass, photo, color: userColor }
-
-  conn.execute('INSERT INTO users (name, surname, role, email, password, photo, color) VALUES (?, ?, ?, ?, ?, ?, ?)',
-    [data.name, data.surname, data.role, data.email, data.password, data.photo, data.color],
-
-    
+  conn.execute('INSERT INTO users (name, surname, role, email, password, photo, phone) VALUES (?, ?, ?, ?, ?, ?, ?)',
+    [data.name, data.surname, data.role, data.email, data.password, data.photo, data.phone],
   )
 
 }

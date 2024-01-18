@@ -8,6 +8,8 @@ import isBetween from 'dayjs/plugin/isBetween';
 import { z } from "zod";
 import { conn } from './db/mysqlconnection';
 import { RowDataPacket } from "mysql2";
+import { error } from "console";
+import { verifyPass } from "./user/hashPass";
 var customParseFormat = require('dayjs/plugin/customParseFormat')
 
 interface Worker{
@@ -33,16 +35,37 @@ export async function appRoutes(app: FastifyInstance) {
     return 'helooo'
   })
 
-  app.post('/userLogin', async (request) => {
+  app.post('/userLogin', async (request, response) => {
     const userData = z.object({
       user: z.string(),
       password: z.string()
     })
 
     const { user, password } = userData.parse(request.body)
-    console.log(user, password)
+    const query = 'SELECT * FROM users WHERE name = ?'
+    const [dbResponse] = await conn.execute(query,[user])
+    if ((dbResponse as RowDataPacket[]).length === 0){
+      response.status(401).send({ error: 'Invalid Credentials' })
+    }
+    const userRecord = (dbResponse as RowDataPacket[])[0]
+
+    const passwordMatch = verifyPass(password, userRecord.password)
+
+    if(!passwordMatch){
+      response.status(401).send({ error: 'Invalid Credentials pass'})
+    }else {
+      response.status(200).send({ message: 'Login Successful', id: userRecord.id})
+    }
   })
 
+  app.get('/userLogged', async (request) => {
+    const user = z.object({
+      userId: z.string()
+    })
+    const { userId } = user.parse(request.query)
+    const [dbResponse] = await conn.execute('SELECT * FROM users WHERE id = ?', [userId])
+    return dbResponse
+  })
   app.withTypeProvider<ZodTypeProvider>().route({
     method: 'POST',
     url: '/profile',
@@ -51,23 +74,26 @@ export async function appRoutes(app: FastifyInstance) {
     },
     handler: registerUserController
   })
-
   app.get('/workers', async () => {
     const [dbResponse] = await conn.execute('SELECT * FROM `users`');
     return dbResponse;
   })
+
   app.get('/AllOrders',async () => {
     const [dbResponse] = await conn.execute('SELECT * FROM `service_orders`')
     return dbResponse;
   })
+
   app.get('/NewOrders', async () => {
     const [dbResponse] = await conn.execute('SELECT id, created_at FROM service_orders')
     return dbResponse;
   })
+
   app.get('/CompletedOrders', async () => {
     const [dbResponse] = await conn.execute('SELECT id, completed_at FROM service_orders WHERE status = ?', ['completed'])
     return dbResponse;
   })
+
   app.get('/NewOrdersCount', async () => {
     const [dbResponse] = await conn.execute('SELECT id FROM `service_orders` WHERE `status` = ?', ['new'],); 
     let result = Object.values(JSON.parse(JSON.stringify(dbResponse)));

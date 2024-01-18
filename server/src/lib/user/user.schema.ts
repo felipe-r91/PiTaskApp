@@ -8,6 +8,7 @@ export const userSchema = z.object({
   email: z.string(),
   role: z.string(),
   photo: z.string(),
+  phone: z.string()
 })
 
 export type CreateUserSchema = z.infer<typeof userSchema>

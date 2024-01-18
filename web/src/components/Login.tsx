@@ -1,19 +1,35 @@
 import { Logo } from "../assets/Logo1";
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 import { api } from "../lib/axios";
+import { useAuth } from "./AuthContext";
 
 
 export function Login() {
 
   const [user, setUser] = useState('')
   const [password, setPassword] = useState('')
+  const { login } = useAuth()
 
-  async function submitForm(){
-    //to-do hash password before sending
-    await api.post('/userLogin', {
-      user,
-      password,
-    })
+  async function submitForm(e : FormEvent){
+    //e.preventDefault()
+    try {
+      const response = await api.post('/userLogin', {
+        user,
+        password,
+      });
+
+      if (response.status === 200) {
+        // On successful login, update the user context
+        const id = response.data.id
+        login(user, id);
+        
+      }
+    } catch (error) {
+      console.error('Login failed: Invalid Credentials');
+      alert('Credenciais Inválidas')
+      setUser('')
+      setPassword('')
+    }
     
   }
 

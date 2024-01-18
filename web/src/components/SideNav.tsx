@@ -1,11 +1,33 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { TbCalendar, TbDashboard, TbTimelineEvent, TbReport, TbUserPlus, TbSettings, TbLogout } from 'react-icons/tb';
 import '../styles/sideNavIcon.css';
 import { Logo } from '../assets/Logo';
 import { AvatarColab } from '../assets/AvatarColab';
+import { api } from '../lib/axios';
+
+type User = {
+  name: string;
+  surname: string;
+  photo: string;
+}
 
 export function SideNav() {
+
+  const [user, setUser] = useState<User>()
+
+  const userId = sessionStorage.getItem('id')
+
+  useEffect(() => {
+    api.get('/userLogged', {
+      params: {
+        userId
+      }
+    }).then(response => {
+      console.log(response.data)
+      setUser(response.data[0])
+    })
+  },[])
 
   const menus = [
     { name: 'Dashboard', link: '/Dashboard', icon: TbDashboard },
@@ -17,13 +39,16 @@ export function SideNav() {
     { name: 'Logout', link: '/', icon: TbLogout}
   ]
 
-  const [open, setOpen] = useState(false);
+  const [open] = useState(false);
 
   return (
 
     <div className="bg-[#FBFAFF] min-w-[80px] flex flex-col items-center">
       <div className='mt-5 mx-2'>
       <Logo width={70}/>
+      </div>
+      <div className='pt-16'>
+      <AvatarColab width={'w-[45px]'} height={'h-[45px]'} img={user?.photo} name={user?.name} surname={user?.surname}/>
       </div>
       <div className="mt-20 flex flex-col gap-8">
         {menus?.map((menu, i) => (
@@ -42,9 +67,7 @@ export function SideNav() {
           </Link>
         ))}
       </div>
-      <div className='pt-28'>
-      <AvatarColab width={'w-[45px]'} height={'h-[45px]'} img={'felipe.png'} name={'felipe'}/>
-      </div>
+      
     </div>
   );
 };
