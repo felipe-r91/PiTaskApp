@@ -350,6 +350,7 @@ export function TimelineScheduler(props: Props) {
   const handleScroll: React.UIEventHandler<HTMLDivElement> = (e) => {
     const target = e.currentTarget;
     setScrollPosition(target.scrollTop);
+    setDays([]);
   }
   
   function previousDate() {
@@ -416,10 +417,10 @@ export function TimelineScheduler(props: Props) {
           </button>
         </div>
         <div className="flex gap-2 bg-[#edecfe] border border-[#E5E5ED] rounded-2xl">
-          <button type="button" onClick={() => {setViewType('Days'); setHeaderDateFormat('d/M/yyyy'); props.fetchAssignedOrders(); setStartDateCalendar(startDateCalendar.firstDayOfMonth())}} className={`w-fit h-[30px] rounded-2xl px-3  ${viewType === 'Days' ? 'bg-purple-light' : 'bg-[#edecfe]'} ${viewType === 'Days' ? 'text-white' : 'text-purple-dark'}  text-[14px] flex items-center justify-between`}>
+          <button type="button" onClick={() => {setViewType('Days'); setDays([]); setHeaderDateFormat('d/M/yyyy'); props.fetchAssignedOrders(); setStartDateCalendar(startDateCalendar.firstDayOfMonth())}} className={`w-fit h-[30px] rounded-2xl px-3  ${viewType === 'Days' ? 'bg-purple-light' : 'bg-[#edecfe]'} ${viewType === 'Days' ? 'text-white' : 'text-purple-dark'}  text-[14px] flex items-center justify-between`}>
             Quinzenal
           </button>
-          <button type="button" onClick={() => {setViewType('Week'); setHeaderDateFormat('dddd d/M/yyyy'); props.fetchAssignedOrders()}} className={`w-fit h-[30px] rounded-2xl px-3  ${viewType === 'Week' ? 'bg-purple-light' : 'bg-[#edecfe]'} ${viewType === 'Week' ? 'text-white' : 'text-purple-dark'} text-[14px] flex items-center justify-between`}>
+          <button type="button" onClick={() => {setViewType('Week'); setDays([]); setHeaderDateFormat('dddd d/M/yyyy'); props.fetchAssignedOrders()}} className={`w-fit h-[30px] rounded-2xl px-3  ${viewType === 'Week' ? 'bg-purple-light' : 'bg-[#edecfe]'} ${viewType === 'Week' ? 'text-white' : 'text-purple-dark'} text-[14px] flex items-center justify-between`}>
             Semanal
           </button>
         </div>

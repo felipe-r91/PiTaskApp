@@ -76,7 +76,7 @@ export function SignIn() {
     
         formik.resetForm();
         setCurrentImage(undefined);
-        setPreviewImage('');
+        setPreviewImage('/src/assets/uploads/user.png');
         alert("Usuário criado com sucesso!");
       } catch (error) {
         console.error('Error uploading file:', error);
