@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { TbCalendar, TbDashboard, TbTimelineEvent, TbReport, TbUserPlus, TbSettings, TbLogout } from 'react-icons/tb';
 import '../styles/sideNavIcon.css';
 import { Logo } from '../assets/Logo';
 import { AvatarColab } from '../assets/AvatarColab';
 import { api } from '../lib/axios';
+import { useAuth } from './AuthContext';
 
 type User = {
   name: string;
@@ -15,8 +16,9 @@ type User = {
 export function SideNav() {
 
   const [user, setUser] = useState<User>()
-
   const userId = sessionStorage.getItem('id')
+  const { logout } = useAuth()
+  const nav = useNavigate()
 
   useEffect(() => {
     api.get('/userLogged', {
@@ -24,10 +26,15 @@ export function SideNav() {
         userId
       }
     }).then(response => {
-      console.log(response.data)
       setUser(response.data[0])
     })
   },[])
+
+  function handleLogout(){
+    logout()
+    alert('Logout realizado!')
+    nav('/', {replace: true})
+  }
 
   const menus = [
     { name: 'Dashboard', link: '/Dashboard', icon: TbDashboard },
@@ -56,6 +63,7 @@ export function SideNav() {
             to={menu?.link}
             key={i}
             className='sideNavIcon z-[9] group flex items-center gap-3.5 font-medium p-2 rounded-2xl transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-110 hover:bg-purple-light duration-300 hover:shadow-custom'
+            onClick={menu.name === 'Logout' ? handleLogout : undefined}
           >
             <div>{React.createElement(menu?.icon, { size: "24" })}</div>
             <h2

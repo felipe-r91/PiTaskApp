@@ -52,21 +52,35 @@ export function SignIn() {
     }),
 
 
-    onSubmit: function (values) {
-      api.post('/profile', {
-        name: values.name,
-        surname: values.surname,
-        password: values.password,
-        confirmPWD: values.confirmPWD,
-        email: values.email,
-        role: values.role,
-        photo: values.photo,
-        phone: values.phone
-      })
-      formik.resetForm()
-      setCurrentImage(undefined)
-      setPreviewImage('')
-      alert("Usuário criado com sucesso!")
+    onSubmit: async function (values) {
+
+      try {
+        const formData = new FormData();
+        formData.append('name', values.name);
+        formData.append('surname', values.surname);
+        formData.append('password', values.password);
+        formData.append('confirmPWD', values.confirmPWD);
+        formData.append('email', values.email);
+        formData.append('role', values.role);
+        formData.append('phone', values.phone);
+        
+        if (currentImage) {
+          formData.append('photo', currentImage);
+        }
+    
+        await api.post('/profile', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+    
+        formik.resetForm();
+        setCurrentImage(undefined);
+        setPreviewImage('');
+        alert("Usuário criado com sucesso!");
+      } catch (error) {
+        console.error('Error uploading file:', error);
+      }
     }
   })
 

@@ -1,6 +1,6 @@
 import { useFormik } from "formik";
 import * as Yup from 'yup';
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, FormEvent, useState } from "react";
 import '../styles/uploadPhoto.css';
 import { api } from "../lib/axios";
 import { Logo } from "../assets/Logo1";
@@ -50,21 +50,35 @@ export function NewUser() {
     }),
 
 
-    onSubmit: function (values) {
-      api.post('/profile', {
-        name: values.name,
-        surname: values.surname,
-        password: values.password,
-        confirmPWD: values.confirmPWD,
-        email: values.email,
-        role: values.role,
-        photo: values.photo,
-        phone: values.phone
-      })
-      formik.resetForm()
-      setCurrentImage(undefined)
-      setPreviewImage('')
-      alert("Usuário criado com sucesso!")
+    onSubmit: async function (values) {
+      
+      try {
+        const formData = new FormData();
+        formData.append('name', values.name);
+        formData.append('surname', values.surname);
+        formData.append('password', values.password);
+        formData.append('confirmPWD', values.confirmPWD);
+        formData.append('email', values.email);
+        formData.append('role', values.role);
+        formData.append('phone', values.phone);
+        
+        if (currentImage) {
+          formData.append('photo', currentImage);
+        }
+
+        await api.post('/profile', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          }
+        });
+
+        formik.resetForm();
+        setCurrentImage(undefined);
+        setPreviewImage('/src/assets/uploads/user.png');
+        alert("Usuário criado com sucesso!");
+      } catch (error) {
+        console.error('Error uploading file:', error);
+      }
     }
   })
 
@@ -78,7 +92,7 @@ export function NewUser() {
             </div>
           </div>
           <div className="grid grid-flow-col pt-5">
-            <form onSubmit={formik.handleSubmit} className="w-fit flex pl-40">
+            <form onSubmit={formik.handleSubmit} className="w-fit flex pl-40" encType="multipart/form-data">
               <div className="grid gap-6 w-[137px] h-fit mt-10">
                 <div className="w-[137px] h-[137px] border-4 border-[#D9DADE] rounded-full overflow-hidden bg-[#D9DADE] flex items-center justify-center">
                   <img src={previewImage} alt="Foto" />
@@ -89,6 +103,7 @@ export function NewUser() {
                   onChange={(e) => handleSetImage(e)}
                   className='hidden'
                   id="photo"
+                  name="photo"
                   accept=".jpg, .jpeg, .png"
                 />
                 <button type="button" className="w-[150px] h-[35px] bg-[#EDECFE] text-base text-[#5051F9] hover:bg-[#5051F9] hover:text-white rounded-md ml-[-5px]">

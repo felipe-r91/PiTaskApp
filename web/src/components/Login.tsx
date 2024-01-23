@@ -2,6 +2,7 @@ import { Logo } from "../assets/Logo1";
 import { FormEvent, useState } from "react";
 import { api } from "../lib/axios";
 import { useAuth } from "./AuthContext";
+import { useNavigate } from "react-router-dom";
 
 
 export function Login() {
@@ -9,6 +10,7 @@ export function Login() {
   const [user, setUser] = useState('')
   const [password, setPassword] = useState('')
   const { login } = useAuth()
+  const nav = useNavigate()
 
   async function submitForm(e : FormEvent){
     //e.preventDefault()
@@ -17,6 +19,8 @@ export function Login() {
         user,
         password,
       });
+
+      console.log(response.status)
 
       if (response.status === 200) {
         // On successful login, update the user context
@@ -29,6 +33,7 @@ export function Login() {
       alert('Credenciais Inválidas')
       setUser('')
       setPassword('')
+      nav('/')
     }
     
   }

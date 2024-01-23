@@ -1,4 +1,4 @@
-import { TbCalendarStats } from "react-icons/tb";
+import { TbCalendarCancel, TbCalendarStats } from "react-icons/tb";
 import { OSButton } from "./OSButton";
 import { useEffect, useState } from "react";
 import { api } from "../lib/axios";
@@ -33,11 +33,26 @@ export function DashRightMenu() {
         </div>
       </div>
       <div className="grid gap-5 w-[384px] justify-center overflow-auto max-h-[550px] scrollbar-hide pb-6 pt-2">
-        {todayOrders.map(order =>
-          <div key={order.orderId} className="">
-            <OSButton soNumber={order.orderId} soCostumer={order.costumer.substring(7, 20)} soWorkersId={order.workersId} />
-          </div>
-        )}
+        { todayOrders.length > 0 ? (
+          todayOrders.map(order =>
+            <div key={order.orderId} className="">
+              <OSButton soNumber={order.orderId} soCostumer={order.costumer.substring(7, 20)} soWorkersId={order.workersId} />
+            </div>
+          )
+        
+          ) : (
+            <div className="pt-32">
+              <div className="flex items-center justify-center pb-6">
+              <TbCalendarCancel size={55} color="#8D98A9"/>
+              </div>
+            <div className="text-[#8D98A9] text-xl font-medium">
+              Nada Planejado
+            </div>
+
+            </div>
+          )
+        }
+
       </div>
     </div>
   )

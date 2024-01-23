@@ -1,16 +1,38 @@
 import { FastifyInstance } from "fastify";
-import { ZodTypeProvider } from 'fastify-type-provider-zod'
-import { registerUserController } from "./user/user.controller";
-import { userSchema } from "./user/user.schema";
 import dayjs from "dayjs";
 import weekOfYear from 'dayjs/plugin/weekOfYear';
 import isBetween from 'dayjs/plugin/isBetween';
 import { z } from "zod";
 import { conn } from './db/mysqlconnection';
 import { RowDataPacket } from "mysql2";
-import { error } from "console";
-import { verifyPass } from "./user/hashPass";
-var customParseFormat = require('dayjs/plugin/customParseFormat')
+import { hashPass, verifyPass } from "./user/hashPass";
+var customParseFormat = require('dayjs/plugin/customParseFormat');
+import multer from 'fastify-multer';
+let uniqueFileName: string
+
+const storage = multer.diskStorage({
+  destination: function(req, file, cb){
+    cb(null, 'C:/Users/User/Documents/taskApp/web/src/assets/uploads')
+  },
+  filename: function(req, file, cb){
+    uniqueFileName = Date.now().toString().concat(file.originalname)
+    cb(null, uniqueFileName)
+  }
+})
+const upload = multer({ storage: storage });
+import {FastifyReply, FastifyRequest } from "fastify";
+
+interface CustomFastifyRequest extends FastifyRequest {
+  file?: {
+    buffer: Buffer;
+    encoding: string;
+    fieldname: string;
+    mimetype: string;
+    originalname: string;
+    size: number;
+  };
+}
+
 
 interface Worker{
   id: number,
@@ -66,16 +88,26 @@ export async function appRoutes(app: FastifyInstance) {
     const [dbResponse] = await conn.execute('SELECT * FROM users WHERE id = ?', [userId])
     return dbResponse
   })
-  app.withTypeProvider<ZodTypeProvider>().route({
-    method: 'POST',
-    url: '/profile',
-    schema: {
-      body: userSchema
-    },
-    handler: registerUserController
-  })
+
+ app.post('/profile', {preHandler: upload.single('photo')},  async function( request: CustomFastifyRequest, reply: FastifyReply ){
+  
+    const formFields = z.object({
+      name: z.string(),
+      surname: z.string(),
+      password: z.string(),
+      email: z.string(),
+      role: z.string(),
+      phone: z.string()
+    })
+    const { name, surname, password, email, role, phone } = formFields.parse(request.body)
+    const { hashedPass } = hashPass(password)
+    
+    await conn.execute('INSERT INTO users (name, surname, role, email, password, photo, phone) VALUES (?, ?, ?, ?, ?, ?, ?)', [name, surname, role, email, hashedPass, uniqueFileName, phone])
+    
+  });
+
   app.get('/workers', async () => {
-    const [dbResponse] = await conn.execute('SELECT * FROM `users`');
+    const [dbResponse] = await conn.execute('SELECT * FROM users WHERE role != ?', ['admin']);
     return dbResponse;
   })
 

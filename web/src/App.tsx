@@ -11,6 +11,7 @@ import { Login } from './components/Login';
 import { SignIn } from './components/SignIn';
 import { useAuth } from './components/AuthContext';
 
+
 export function App() {
   const { user } = useAuth();
 
