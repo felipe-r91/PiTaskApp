@@ -64,7 +64,7 @@ export function SideNav() {
           <Link
             to={menu?.link}
             key={i}
-            className='sideNavIcon z-[9] group flex items-center gap-3.5 font-medium p-2 rounded-2xl transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-110 hover:bg-purple-light duration-300 hover:shadow-custom'
+            className='sideNavIcon z-30 group flex items-center gap-3.5 font-medium p-2 rounded-2xl transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-110 hover:bg-purple-light duration-300 hover:shadow-custom'
             onClick={menu.name === 'Logout' ? handleLogout : undefined}
           >
             <div>{React.createElement(menu?.icon, { size: "24" })}</div>

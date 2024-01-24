@@ -144,7 +144,7 @@ export function EditOS(props: FormProps) {
   }
 
   switch (formPage) {
-
+    default :
     case 0:
       return (
         <>

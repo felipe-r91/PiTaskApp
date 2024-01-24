@@ -32,9 +32,6 @@ Theme Designer Version: 2021.09.25.67272
 	overflow: hidden;
 	margin: 1px;
 	background-color: #f2f2f2;
-	//-moz-border-radius: 10px;
-	//-webkit-border-radius: 10px;
-	//border-radius: 10px;
 	padding: 15px;
 	border: 1px solid #cccccc;
 	left: 2px;
@@ -153,7 +150,6 @@ Theme Designer Version: 2021.09.25.67272
 .daypilotcalendar_rowheader_inner {
 	padding-left: 10px;
 	padding-top: 12px;
-	//background:#17A8A3; 
 }
 .daypilotcalendar_cell_inner
 {
@@ -165,7 +161,6 @@ Theme Designer Version: 2021.09.25.67272
 	border-right: 2px solid #eeeeee;
 	border-bottom: 1px solid #eeeeee;
 	background: #f9f9f9;
-	//min-width: 180px;
 }
 .daypilotcalendar_cell_business .daypilotcalendar_cell_inner {
 	background: #ffffff;

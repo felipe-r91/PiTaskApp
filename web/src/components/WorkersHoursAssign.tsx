@@ -576,6 +576,7 @@ export function WorkersAssignHours(props: WorkerHoursProps) {
   }
 
   switch (formState.formPage) {
+    default:
     case 0:
       return (
         <>

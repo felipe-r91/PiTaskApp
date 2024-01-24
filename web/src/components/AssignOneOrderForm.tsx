@@ -121,6 +121,7 @@ export function AssignOneOrderForm(props: FormProps) {
   }
   
   switch (formPage) {
+    default:
     case 0:
       return (
         <SelectOrderForm/>
@@ -347,6 +348,7 @@ export function AssignOneOrderForm(props: FormProps) {
     case 2:
       return (
         <>
+        
           <WorkersAssignHours orderId={osId} osWorker={osWorker} osBu={osBu} osHours={osHours} osDate={osDate} cntrlBackButton={setBackButton}/>
           {backButton &&
             <button type='button' onClick={() => setFormPage(1)} className='w-24 h-9 flex justify-center items-center bg-[#EDECFE] text-base text-[#5051F9] hover:bg-[#5051F9] hover:text-white rounded-xl absolute right-40 bottom-7'>
@@ -354,7 +356,6 @@ export function AssignOneOrderForm(props: FormProps) {
               Voltar
             </button>
           }
-
 
         </>
       )
