@@ -6,7 +6,7 @@ interface AuthProviderProps {
 
 interface AuthContextType {
   user: string | null;
-  login: (user: string, userId: number) => void;
+  login: (user: string, userId: number, role: string) => void;
   logout: () => void;
 }
 
@@ -21,16 +21,18 @@ export function AuthProvider({children}: AuthProviderProps){
     }
   },[])
 
-  function login(newUser : string, userId: number){
+  function login(newUser : string, userId: number, role: string){
     setUser(newUser)
     sessionStorage.setItem('user', newUser)
     sessionStorage.setItem('id', userId.toString())
+    sessionStorage.setItem('role', role)
   }
 
   function logout(){
     setUser(null)
     sessionStorage.removeItem('user')
     sessionStorage.removeItem('id')
+    sessionStorage.removeItem('role')
   }
 
   return(

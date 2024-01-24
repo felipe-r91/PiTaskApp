@@ -25,7 +25,8 @@ export function Login() {
       if (response.status === 200) {
         // On successful login, update the user context
         const id = response.data.id
-        login(user, id);
+        const role = response.data.role
+        login(user, id, role);
         
       }
     } catch (error) {
@@ -67,6 +68,7 @@ export function Login() {
                 id="password"
                 autoComplete="off"
                 onChange={e => setPassword(e.target.value)}
+                required
               >
               </input>
             </fieldset>

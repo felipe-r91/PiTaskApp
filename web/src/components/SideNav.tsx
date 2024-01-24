@@ -17,13 +17,15 @@ export function SideNav() {
 
   const [user, setUser] = useState<User>()
   const userId = sessionStorage.getItem('id')
+  const role = sessionStorage.getItem('role')
   const { logout } = useAuth()
   const nav = useNavigate()
 
   useEffect(() => {
     api.get('/userLogged', {
       params: {
-        userId
+        userId,
+        role
       }
     }).then(response => {
       setUser(response.data[0])

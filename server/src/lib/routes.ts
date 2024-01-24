@@ -65,28 +65,45 @@ export async function appRoutes(app: FastifyInstance) {
 
     const { user, password } = userData.parse(request.body)
     const query = 'SELECT * FROM users WHERE name = ?'
-    const [dbResponse] = await conn.execute(query,[user])
-    if ((dbResponse as RowDataPacket[]).length === 0){
+    const query1 = 'SELECT * FROM admins WHERE name = ?'
+    const [dbResponse] = await conn.execute(query, [user])
+    const [dbResponse1] = await conn.execute(query1, [user])
+    let userRecord: RowDataPacket = (dbResponse1 as RowDataPacket[])[0]
+    let role: string = ''
+    if ((dbResponse as RowDataPacket[]).length === 0 && (dbResponse1 as RowDataPacket[]).length === 0){
       response.status(401).send({ error: 'Invalid Credentials' })
     }
-    const userRecord = (dbResponse as RowDataPacket[])[0]
+    if((dbResponse as RowDataPacket[]).length > 0){
+      userRecord = (dbResponse as RowDataPacket[])[0]
+    }
+    if((dbResponse1 as RowDataPacket[]).length > 0){
+      userRecord = (dbResponse1 as RowDataPacket[])[0]
+      userRecord.role = 'admin'
+    }
 
     const passwordMatch = verifyPass(password, userRecord.password)
 
     if(!passwordMatch){
       response.status(401).send({ error: 'Invalid Credentials pass'})
     }else {
-      response.status(200).send({ message: 'Login Successful', id: userRecord.id})
+      response.status(200).send({ message: 'Login Successful', id: userRecord.id, role: userRecord.role})
     }
   })
 
   app.get('/userLogged', async (request) => {
     const user = z.object({
-      userId: z.string()
+      userId: z.string(),
+      role: z.string()
     })
-    const { userId } = user.parse(request.query)
-    const [dbResponse] = await conn.execute('SELECT * FROM users WHERE id = ?', [userId])
-    return dbResponse
+    const { userId, role } = user.parse(request.query)
+    if(role === 'admin'){
+      const [dbResponse] = await conn.execute('SELECT * FROM admins WHERE id = ?', [userId])
+      return dbResponse
+    } else {
+      const [dbResponse] = await conn.execute('SELECT * FROM users WHERE id = ?', [userId])
+      return dbResponse
+    }
+    
   })
 
  app.post('/profile', {preHandler: upload.single('photo')},  async function( request: CustomFastifyRequest, reply: FastifyReply ){
@@ -101,13 +118,16 @@ export async function appRoutes(app: FastifyInstance) {
     })
     const { name, surname, password, email, role, phone } = formFields.parse(request.body)
     const { hashedPass } = hashPass(password)
-    
-    await conn.execute('INSERT INTO users (name, surname, role, email, password, photo, phone) VALUES (?, ?, ?, ?, ?, ?, ?)', [name, surname, role, email, hashedPass, uniqueFileName, phone])
+    if(role === 'admin'){
+      await conn.execute('INSERT INTO admins (name, surname, password, photo) VALUES (?, ?, ?, ?)', [name, surname, hashedPass, uniqueFileName])
+    } else {
+      await conn.execute('INSERT INTO users (name, surname, role, email, password, photo, phone) VALUES (?, ?, ?, ?, ?, ?, ?)', [name, surname, role, email, hashedPass, uniqueFileName, phone])
+    }
     
   });
 
   app.get('/workers', async () => {
-    const [dbResponse] = await conn.execute('SELECT * FROM users WHERE role != ?', ['admin']);
+    const [dbResponse] = await conn.execute('SELECT * FROM users');
     return dbResponse;
   })
 
@@ -236,17 +256,12 @@ export async function appRoutes(app: FastifyInstance) {
       osAnnotation: z.string()
     })
     const { osId, osBu, osDate, osHours, osAnnotation, osWorker } = updateOrder.parse(request.body)
-    const osWorkerId: number[] = []
-    osWorker.forEach(worker => {
-      worker = worker + 1
-      osWorkerId.push(worker)
-    });
 
     dayjs.extend(customParseFormat)
     const osDateCorrect = dayjs(osDate).startOf('day').toDate()
 
     await conn.execute('UPDATE `service_orders` SET `bu` = ?, `start_date` = ?, `planned_hours` = ?, `annotation` = ?, `assigned_workers_id` = ? WHERE `id` = ?', 
-    [osBu, osDateCorrect, osHours, osAnnotation, osWorkerId, osId])
+    [osBu, osDateCorrect, osHours, osAnnotation, osWorker, osId])
        
   })
 
@@ -318,7 +333,6 @@ export async function appRoutes(app: FastifyInstance) {
     var parsedQuery = JSON.parse('['+ workerId +']')
     const osWorkerId: number[] = []
     parsedQuery.forEach((worker: number) => {
-      worker = worker + 1
       osWorkerId.push(worker)
     });
     const [dbResponse] = await conn.execute('SELECT id, name, surname, photo FROM `users`');

@@ -78,6 +78,7 @@ export function SignIn() {
         setCurrentImage(undefined);
         setPreviewImage('/src/assets/uploads/user.png');
         alert("Usuário criado com sucesso!");
+        nav('/')
       } catch (error) {
         console.error('Error uploading file:', error);
       }

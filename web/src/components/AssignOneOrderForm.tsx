@@ -311,10 +311,10 @@ export function AssignOneOrderForm(props: FormProps) {
                 <Checkbox.Root
                   className='flex items-center gap-5'
                   key={worker.id}
-                  checked={osWorker.includes(index)}
-                  onCheckedChange={() => handleToogleWorker(index)}
+                  checked={osWorker.includes(worker.id)}
+                  onCheckedChange={() => handleToogleWorker(worker.id)}
                 >
-                  <div className={`w-[215px] h-[50px] rounded-[10px]  ${osWorker.includes(index) ? 'bg-purple-light' : 'bg-white'} ${osWorker.includes(index) ? 'text-white' : 'text-purple-dark'} ${osWorker.includes(index) ? 'border-none' : 'border-none border-[#E5E5ED]'}  flex pl-5 pr-16 items-center justify-between`}>
+                  <div className={`w-[215px] h-[50px] rounded-[10px]  ${osWorker.includes(worker.id) ? 'bg-purple-light' : 'bg-white'} ${osWorker.includes(worker.id) ? 'text-white' : 'text-purple-dark'} ${osWorker.includes(worker.id) ? 'border-none' : 'border-none border-[#E5E5ED]'}  flex pl-5 pr-16 items-center justify-between`}>
                     <div
                       title={worker.surname}
                       className='flex items-center justify-around gap-6'>
