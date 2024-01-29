@@ -7,7 +7,8 @@ import mariadb from 'mariadb';
     port: 3306,
     user: 'taskapp',
     database: 'task_app_data',
-    password: 'Chiller@01'
+    password: 'Chiller@01',
+    connectionLimit: 40,
   });
 
   export const connection = async () => {
