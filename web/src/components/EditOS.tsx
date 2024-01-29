@@ -199,7 +199,6 @@ export function EditOS(props: FormProps) {
                   {orderDetails?.description}
                 </div>
               </div>
-              <div>{workersIdToUpdate}</div>
             </div>
             <div className='w-[459px] pt-5 pl-[-30px] justify-center'>
               {!showAddWorker &&
