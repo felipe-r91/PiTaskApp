@@ -34,7 +34,6 @@ export function EditOS(props: FormProps) {
   const [showSaveButton, setShowSaveBtn] = useState<boolean>(false)
   const [showUndoButton, setShowUndoBtn] = useState<boolean>(false)
   const [newWorkers, setNewWorkers] = useState<number[]>([])
-  const [workersId, setWorkersId] = useState<number[]>([])
   const [formPage, setFormPage] = useState<number>(0)
   const [backButton, setBackButton] = useState(true)
   const totalWorkedHours: number[] = []
@@ -124,9 +123,16 @@ export function EditOS(props: FormProps) {
       const newWorkersWithRemovedOne = newWorkers.filter(ids => ids != id)
       setNewWorkers(newWorkersWithRemovedOne)
     }
+    /*if (!workersIdToUpdate.includes(id)) {
+      setWorkersIdToUpdate(prevIds => [... prevIds, id])
+    }
+    if (workersIdToUpdate.includes(id)) {
+      const workersIdWithRemovedOne = workersIdToUpdate.filter(ids => ids != id)
+      setWorkersIdToUpdate(workersIdWithRemovedOne)
+    }*/
   }
 
-  function fixNewWorkerId(){
+  /*function fixNewWorkerId(){
     setWorkersId(newWorkers)
     const fixedArray : number[] = []
     newWorkers.map(worker => {
@@ -134,7 +140,7 @@ export function EditOS(props: FormProps) {
       fixedArray.push(fixedId)
     })
     setNewWorkers(fixedArray)
-  }
+  }*/
 
   function calcTotalExecHours(): string{
     const totalHours = totalWorkedHours.reduce((acc, currValue) => {
@@ -193,6 +199,7 @@ export function EditOS(props: FormProps) {
                   {orderDetails?.description}
                 </div>
               </div>
+              <div>{workersIdToUpdate}</div>
             </div>
             <div className='w-[459px] pt-5 pl-[-30px] justify-center'>
               {!showAddWorker &&
@@ -292,7 +299,9 @@ export function EditOS(props: FormProps) {
                         <button
                           type="button"
                           className='w-24 h-9 flex justify-center gap-1 items-center bg-[#EDECFE] text-base text-[#5051F9] hover:bg-[#5051F9] hover:text-white rounded-xl absolute right-12 bottom-7'
-                          onClick={() => {fixNewWorkerId(); setFormPage(1)}}
+                          onClick={() => {
+                            //fixNewWorkerId(); 
+                            setFormPage(1)}}
                         >
                           Avançar
                           <TbChevronRight size={15} />
@@ -321,7 +330,7 @@ export function EditOS(props: FormProps) {
     case 1:
       return (
         <>
-          <WorkersAssignHours orderId={getOrderId()} osWorker={newWorkers} osWorker1={workersId} osBu={orderDetails?.bu} osHours={orderDetails?.planned_hours} isEditingOS={true} cntrlBackButton={setBackButton} />
+          <WorkersAssignHours orderId={getOrderId()} osWorker={newWorkers} osWorker1={newWorkers}  osBu={orderDetails?.bu} osHours={orderDetails?.planned_hours} isEditingOS={true} cntrlBackButton={setBackButton} />
           {backButton &&
             <button type='button' onClick={() => { setFormPage(0); setNewWorkers([]) }} className='w-24 h-9 flex justify-center items-center bg-[#EDECFE] text-base text-[#5051F9] hover:bg-[#5051F9] hover:text-white rounded-xl absolute right-40 bottom-7'>
               <TbChevronLeft size={15} />

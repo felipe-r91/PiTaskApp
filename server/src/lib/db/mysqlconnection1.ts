@@ -3,7 +3,7 @@ import mariadb from 'mariadb';
 
   
   const pool = mariadb.createPool( {
-    host: 'localhost',
+    host: '0.0.0.0',
     port: 3306,
     user: 'taskapp',
     database: 'task_app_data',

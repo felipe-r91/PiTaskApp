@@ -73,10 +73,10 @@ export async function appRoutes(app: FastifyInstance) {
       response.status(401).send({ error: 'Invalid Credentials' })
     }
     if(dbResponse.length > 0){
-      userRecord = dbResponse
+      userRecord = dbResponse[0]
     }
     if(dbResponse1.length > 0){
-      userRecord = dbResponse1
+      userRecord = dbResponse1[0]
       userRecord.role = 'admin'
     }
 
@@ -99,12 +99,14 @@ export async function appRoutes(app: FastifyInstance) {
     const { userId, role } = user.parse(request.query)
     if(role === 'admin'){
       const dbResponse = await conn.query('SELECT * FROM admins WHERE id = ?', [userId])
+      conn.release()
       return dbResponse
     } else {
       const dbResponse = await conn.query('SELECT * FROM users WHERE id = ?', [userId])
+      conn.release()
       return dbResponse
     }
-    conn.release()
+    
   })
 
  app.post('/profile', {preHandler: upload.single('photo')},  async function( request: CustomFastifyRequest, reply: FastifyReply ){
@@ -420,8 +422,8 @@ export async function appRoutes(app: FastifyInstance) {
     const osWorker: Worker[] = []
   
     for (let i = 0; json.length > i; i++) {
-      osWorkerId.forEach((worker: any) => {
-        if (worker === json[i].id) {
+      osWorkerId.forEach((worker: number) => {
+        if (worker == json[i].id) {
           const workerOs = {
             id: json[i].id,
             name: json[i].name,
