@@ -158,15 +158,15 @@ export function VisualizeOS(props: FormProps) {
               <div className='bg-white w-6'>
               </div>
             </div>
-            <div className='text-purple-dark text-center text-sm font-semibold pb-2 pt-10'>
+            <div className='text-purple-dark text-center text-sm font-semibold pt-10'>
               LMS
             </div>
-            <div className='grid gap-3 max-h-[230px] h-[230px] overflow-auto scrollbar-hide py-1'>
+            <div className='max-h-[230px] h-[230px] overflow-auto scrollbar-hide'>
               {orderDetails?.status === 'completed' &&
               orderDetails?.lms?.map((lms, index) => {
                 return (
                   <div key={index}>
-                    <div className="flex justify-center items-center gap-3">
+                    <div className="flex justify-center items-center gap-3 pt-2">
                       <div className="text-[#768396] shadow-[#E5E5ED] inline-flex h-[35px] max-w-[90px] flex-1 items-center pl-3 rounded-[9px] px-[10px] text-[15px]  shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]">
                         {lms}
                       </div>

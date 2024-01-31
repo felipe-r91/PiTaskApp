@@ -57,6 +57,7 @@ export async function appRoutes(app: FastifyInstance) {
   })
 
   app.post('/userLogin', async (request, response) => {
+    
     const userData = z.object({
       user: z.string(),
       password: z.string()
@@ -153,7 +154,7 @@ export async function appRoutes(app: FastifyInstance) {
 
   app.get('/CompletedOrders', async () => {
     const conn = await connection()
-    const [dbResponse] = await conn.query('SELECT id, completed_at FROM service_orders WHERE status = ?', ['completed'])
+    const dbResponse = await conn.query('SELECT id, completed_at FROM service_orders WHERE status = ?', ['completed'])
     conn.release()
     return dbResponse;
   })
@@ -289,9 +290,9 @@ export async function appRoutes(app: FastifyInstance) {
 
     dayjs.extend(customParseFormat)
     const osDateCorrect = dayjs(osDate).startOf('day').toDate()
-
+	
     const conn = await connection()
-    await conn.query('UPDATE `service_orders` SET `bu` = ?, `start_date` = ?, `planned_hours` = ?, `annotation` = ?, `assigned_workers_id` = ? WHERE `id` = ?', 
+    await conn.query('UPDATE `service_orders` SET `bu` = ?, `start_date` = ?, `planned_hours` = ?, `annotation` = ?, `assigned_workers_id` = JSON_ARRAY(?) WHERE `id` = ?', 
     [osBu, osDateCorrect, osHours, osAnnotation, osWorker, osId])
     conn.release() 
   })
@@ -377,7 +378,7 @@ export async function appRoutes(app: FastifyInstance) {
     
     for(var i = 0; json.length > i; i++){
       osWorkerId.forEach((worker) => {
-        if(worker === json[i].id){
+        if(worker == json[i].id){
           const workerOs = {
             id : json[i].id,
             name : json[i].name,
@@ -402,13 +403,12 @@ export async function appRoutes(app: FastifyInstance) {
     
     const conn = await connection()
     const dbResponse = await conn.query('SELECT `assigned_workers_id` FROM `service_orders` WHERE `id` = ?', [orderId])
-    const osWorkerId = (dbResponse as any).map((row: { assigned_workers_id: any; }) => row.assigned_workers_id);
+    const osWorkerId = JSON.parse((dbResponse as any)[0].assigned_workers_id);
     const dbResponse1 = await conn.query('SELECT id, name, surname, photo FROM `users`');
     const json = JSON.parse(JSON.stringify(dbResponse1));
-  
     const dbResponse2 = await conn.query('SELECT worker_id, worker_hours FROM `assigned_os` WHERE `order_id` = ?', [orderId])
     const json1 = JSON.parse(JSON.stringify(dbResponse2));
-  
+	
     const groupedData: GroupedData = json1.reduce((result: GroupedData, entry: WorkerData) => {
       const { worker_id, worker_hours } = entry;
       if (!result[worker_id]) {
@@ -456,7 +456,7 @@ export async function appRoutes(app: FastifyInstance) {
     }, 0)
     const workersCount = totalWorkedHours.length   
     const conn = await connection() 
-    await conn.query('UPDATE `service_orders` SET `status` = ?, `lms` = ?, `end_date` = ?, `completed_at` = ?, `performed_hours` = ?, `workers_qnt` = ? WHERE `id` = ?', ['completed', lms, dateTimeNow, completedWeek, perfomedHours, workersCount, orderId])
+    await conn.query('UPDATE `service_orders` SET `status` = ?, `lms` = JSON_ARRAY(?), `end_date` = ?, `completed_at` = ?, `performed_hours` = ?, `workers_qnt` = ? WHERE `id` = ?', ['completed', lms, dateTimeNow, completedWeek, perfomedHours, workersCount, orderId])
     conn.release()
   })
 
@@ -468,7 +468,7 @@ export async function appRoutes(app: FastifyInstance) {
     const dbResponse = await conn.query(query, [todayZeroHour, todayLastHour, 'completed'])
     const aggregatedResults: Record<number, { orderId: number; costumer: string; workersId: number[] }> = {};
 
-    (dbResponse as any).forEach((item: { order_id: any; costumer: any; worker_id: any; }) => {
+    dbResponse.forEach((item: { order_id: any; costumer: any; worker_id: any; }) => {
       const { order_id, costumer, worker_id } = item;
     
       // If orderId is not in the aggregatedResults object, create an entry
@@ -514,8 +514,9 @@ export async function appRoutes(app: FastifyInstance) {
     const conn = await connection()
     const { orderId } = getWorkersId.parse(request.query)
     const dbResponse = await conn.query('SELECT `assigned_workers_id` FROM `service_orders` WHERE `id` = ?', [orderId])
+    const workersId = JSON.parse((dbResponse as any)[0].assigned_workers_id);
     conn.release()
-    return dbResponse;
+    return workersId;
   })
 
   app.post('/AddWorkerToOS',async (request) => {
@@ -531,9 +532,10 @@ export async function appRoutes(app: FastifyInstance) {
         uniqueWid.add(worker)
       }
     })
-    const conn = await connection()
+
     const workersIdDb = Array.from(uniqueWid)
-    await conn.query('UPDATE `service_orders` SET `assigned_workers_id` = ? WHERE `id` = ?', [workersIdDb, orderId])
+    const conn = await connection()
+    await conn.query('UPDATE `service_orders` SET `assigned_workers_id` = JSON_ARRAY(?) WHERE `id` = ?', [workersIdDb, orderId])
     conn.release()
   })
 
@@ -553,8 +555,7 @@ export async function appRoutes(app: FastifyInstance) {
     await conn.query(query, [nameToUpdate, idToUpdate, fixedDate, fixedDate, eventId])
     const dbResponse = await conn.query('SELECT DISTINCT worker_id FROM assigned_os WHERE order_id = ?', [orderId])
     const workerIdsArray = (dbResponse as any).map((row: { worker_id: any; }) => row.worker_id);
-    const jsonIds = JSON.stringify(workerIdsArray)
-    await conn.query('UPDATE service_orders SET assigned_workers_id = ? WHERE id = ?', [jsonIds, orderId])
+    await conn.query('UPDATE service_orders SET assigned_workers_id = JSON_ARRAY(?) WHERE id = ?', [workerIdsArray, orderId])
     conn.release()
   })
 
@@ -580,9 +581,10 @@ export async function appRoutes(app: FastifyInstance) {
     }
     await conn.query('UPDATE assigned_os SET worker_name = ?, worker_id = ?, start_date = ?, end_date = ? WHERE id = ?', [workerName, resourceId, newEventStart, newEventEnd, eventId])
     const dbResponse = await conn.query('SELECT DISTINCT worker_id FROM assigned_os WHERE order_id = ?', [orderId])
+    
     const workerIdsArray = (dbResponse as any).map((row: { worker_id: any; }) => row.worker_id);
-    const jsonIds = JSON.stringify(workerIdsArray)
-    await conn.query('UPDATE service_orders SET assigned_workers_id = ? WHERE id = ?', [jsonIds, orderId])
+    
+    await conn.query('UPDATE service_orders SET assigned_workers_id = JSON_ARRAY(?) WHERE id = ?', [workerIdsArray, orderId])
     conn.release()
   })
 
