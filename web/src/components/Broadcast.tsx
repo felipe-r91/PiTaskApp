@@ -45,6 +45,7 @@ export function Broadcast() {
   const [changeWeek, setChangeWeek] = useState<boolean>(false)
   const [todayWeek, setTodayWeek] = useState<number>(0)
   const [show, setShow] = useState<boolean>(true)
+  const [refresh, setRefresh] = useState<boolean>(true)
   let eventsOnThisWeek: Event[]
 
   function sleep(ms: number | undefined) {
@@ -55,13 +56,13 @@ export function Broadcast() {
     api.get('/workers').then(response => {
       setWorkers(response.data)
     })
-  }, [])
+  }, [refresh])
 
   useEffect(() => {
     api.get('/AllEvents').then(response => {
       setEvents(response.data)
     })
-  }, [])
+  }, [refresh])
 
   useEffect(() => {
     sleep(700).then(() => setShow(true))
@@ -88,7 +89,7 @@ export function Broadcast() {
     setCards(createCards(earliestEvents))
   }, [events, changeWeek])
 
-  sleep(15000).then(() => { setChangeWeek(!changeWeek); })
+  sleep(15000).then(() => { setChangeWeek(!changeWeek); setRefresh(!refresh)})
 
   function buColor(bu: string) {
     switch (bu) {
@@ -191,7 +192,7 @@ export function Broadcast() {
 
   return (
     <>
-      <div className="flex h-[100dvh] overflow-hidden scrollbar-hide">
+      <div className="flex h-[100vh] overflow-hidden scrollbar-hide">
         <section className="w-full bg-off-white">
           <div className="text-purple-xdark text-5xl justify-center items-center flex bg-white h-[90px] font-bold px-10 py-8">Cronograma da Semana {todayWeek}</div>
           <div className="px-10 pt-7 grid grid-rows-3 grid-flow-col gap-2.5">
