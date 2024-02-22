@@ -5,6 +5,7 @@ import dayjs from "dayjs";
 import isBetween from 'dayjs/plugin/isBetween';
 import weekOfYear from 'dayjs/plugin/weekOfYear';
 import { Transition } from "@headlessui/react";
+import { TbCalendarCancel } from "react-icons/tb";
 
 type Worker = {
   id: number;
@@ -46,6 +47,7 @@ export function Broadcast() {
   const [todayWeek, setTodayWeek] = useState<number>(0)
   const [show, setShow] = useState<boolean>(true)
   const [refresh, setRefresh] = useState<boolean>(true)
+  const [emptyAgenda, setEmptyAgenda] = useState<boolean>(false)
   let eventsOnThisWeek: Event[]
 
   function sleep(ms: number | undefined) {
@@ -190,57 +192,77 @@ export function Broadcast() {
     return cardCreated;
   }
 
+  useEffect(() => {
+    if (cards.length === 0) {
+      setEmptyAgenda(true)
+    } else {
+      setEmptyAgenda(false)
+    }
+  }, [events, changeWeek])
+
+
   return (
     <>
       <div className="flex h-[100vh] overflow-hidden scrollbar-hide">
         <section className="w-full bg-off-white">
           <div className="text-purple-xdark text-5xl justify-center items-center flex bg-white h-[90px] font-bold px-10 py-8">Cronograma da Semana {todayWeek}</div>
-          <div className="px-10 pt-7 grid grid-rows-3 grid-flow-col gap-2.5">
-            {cards.map((card, i) => {
-              return (
-                <div key={i}>
-                  <Transition
-                    appear={true}
-                    show={show}
-                    enter="transform transition duration-[1000ms]"
-                    enterFrom="opacity-0 translate-x-[153px]"
-                    enterTo="opacity-100 translate-x-[0px]"
-                    leave="transform duration-[1000ms] transition ease-in-out"
-                    leaveFrom="opacity-100 translate-x-[0px]"
-                    leaveTo="opacity-0 translate-x-[153px]"
-                  >
-                    {show &&
+          {emptyAgenda ?
+          <div className="flex flex-col justify-center items-center pt-[250px]">
+            <TbCalendarCancel size={100} color="#8D98A9" opacity={80} />
+            <div className="text-[#8D98A9] text-2xl pt-4">
+              Sem agenda para a semana
+            </div>
+          </div>
+            :
+            <>
+              <div className="px-10 pt-7 grid grid-rows-3 grid-flow-col gap-2.5">
+                {cards.map((card, i) => {
+                  return (
+                    <div key={i}>
+                      <Transition
+                        appear={true}
+                        show={show}
+                        enter="transform transition duration-[1000ms]"
+                        enterFrom="opacity-0 translate-x-[153px]"
+                        enterTo="opacity-100 translate-x-[0px]"
+                        leave="transform duration-[1000ms] transition ease-in-out"
+                        leaveFrom="opacity-100 translate-x-[0px]"
+                        leaveTo="opacity-0 translate-x-[153px]"
+                      >
+                        {show &&
 
-                      <div className="w-[635px] h-[305px] bg-[#d2d3f8] rounded-xl flex items-center gap-4">
-                        <div className="bg-white w-[235px] h-[297px] rounded-xl ml-1 flex justify-center">
-                          <div className="pt-10 pl-5">
-                            <AvatarColab width="w-[100px]" height="h-[100px]" name={card.workerName} surname={card.workerSurname} img={card.workerPhoto} />
-                            <div className="ml-[-30px] pt-10 justify-center items-center flex flex-col">
-                              <div className="text-purple-dark text-[24px]">{card.workerName} {card.workerSurname}</div>
-                              <div className="text-[#768396] font-medium">{card.workerRole}</div>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex flex-col h-[297px] py-5 gap-3">
-                          {card.orders.map((order, i) => {
-                            return (
-                              <div key={i}>
-                                <div className="bg-white w-[364px] h-[58px] rounded-xl flex items-center justify-between px-3">
-                                  <div className={`${buColor(order.orderBu)} rounded-md w-[45px] flex justify-center font-semibold`}>{order.orderId}</div>
-                                  <div className="text-[#768396]">{order.orderCostumer.substring(7, 25)}</div>
-                                  <div className="text-purple-dark font-bold text-base">{order.orderStartDate}</div>
+                          <div className="w-[635px] h-[305px] bg-[#d2d3f8] rounded-xl flex items-center gap-4">
+                            <div className="bg-white w-[235px] h-[297px] rounded-xl ml-1 flex justify-center">
+                              <div className="pt-10 pl-5">
+                                <AvatarColab width="w-[100px]" height="h-[100px]" name={card.workerName} surname={card.workerSurname} img={card.workerPhoto} />
+                                <div className="ml-[-30px] pt-10 justify-center items-center flex flex-col">
+                                  <div className="text-purple-dark text-[24px]">{card.workerName} {card.workerSurname}</div>
+                                  <div className="text-[#768396] font-medium">{card.workerRole}</div>
                                 </div>
                               </div>
-                            )
-                          })}
-                        </div>
-                      </div>
-                    }
-                  </Transition>
-                </div>
-              )
-            })}
-          </div>
+                            </div>
+                            <div className="flex flex-col h-[297px] py-5 gap-3">
+                              {card.orders.map((order, i) => {
+                                return (
+                                  <div key={i}>
+                                    <div className="bg-white w-[364px] h-[58px] rounded-xl flex items-center justify-between px-3">
+                                      <div className={`${buColor(order.orderBu)} rounded-md w-[45px] flex justify-center font-semibold`}>{order.orderId}</div>
+                                      <div className="text-[#768396]">{order.orderCostumer.substring(7, 25)}</div>
+                                      <div className="text-purple-dark font-bold text-base">{order.orderStartDate}</div>
+                                    </div>
+                                  </div>
+                                )
+                              })}
+                            </div>
+                          </div>
+                        }
+                      </Transition>
+                    </div>
+                  )
+                })}
+              </div>
+            </>
+          }
         </section>
       </div>
     </>

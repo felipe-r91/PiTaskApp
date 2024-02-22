@@ -52,7 +52,7 @@ export function Login() {
       }
       else {
         //Another errors
-        console.log('Login failed', error )
+        console.error('Login failed', (error as AxiosError).code)
         alert('Algo deu errado, tente novamente')
         setShowLoader(false)
       }

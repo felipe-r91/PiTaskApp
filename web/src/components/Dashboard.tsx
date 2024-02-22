@@ -140,7 +140,7 @@ export function Dashboard() {
 
   return (
     
-    <div className="flex h-[100dvh]">
+    <div className="flex h-[100vh]">
       <section className="w-full bg-off-white">
         <div className="flex">
           <div>

@@ -11,7 +11,7 @@ let uniqueFileName: string
 
 const storage = multer.diskStorage({
   destination: function(req, file, cb){
-    cb(null, '/home/orangepi/Downloads/web/src/assets/uploads')
+    cb(null, '/home/orangepi/taskGo/web/src/assets/uploads')
   },
   filename: function(req, file, cb){
     uniqueFileName = Date.now().toString().concat(file.originalname)
@@ -58,37 +58,45 @@ export async function appRoutes(app: FastifyInstance) {
 
   app.post('/userLogin', async (request, response) => {
     
-    const userData = z.object({
-      user: z.string(),
-      password: z.string()
-    })
-    const conn = await connection()
-    const { user, password } = userData.parse(request.body)
-    const query = 'SELECT * FROM users WHERE name = ?'
-    const query1 = 'SELECT * FROM admins WHERE name = ?'
-    const dbResponse = await conn.query(query, [user])
-    const dbResponse1 = await conn.query(query1, [user])
-    let userRecord: any = dbResponse1[0]
-    let role: string = ''
-    if (dbResponse.length === 0 && dbResponse1.length === 0){
-      response.status(401).send({ error: 'Invalid Credentials' })
-    }
-    if(dbResponse.length > 0){
-      userRecord = dbResponse[0]
-    }
-    if(dbResponse1.length > 0){
-      userRecord = dbResponse1[0]
-      userRecord.role = 'admin'
-    }
+    try {
+      const userData = z.object({
+        user: z.string(),
+        password: z.string()
+      })
+      
+      const conn = await connection()
+      const { user, password } = userData.parse(request.body)
+      const query = 'SELECT * FROM users WHERE name = ?'
+      const query1 = 'SELECT * FROM admins WHERE name = ?'
+      const dbResponse = await conn.query(query, [user])
+      const dbResponse1 = await conn.query(query1, [user])
+      let userRecord: any = dbResponse1[0]
+      let role: string = ''
+      if (dbResponse.length === 0 && dbResponse1.length === 0){
+        response.status(401).send({ error: 'Invalid Credentials' })
+      }
+      if(dbResponse.length > 0){
+        userRecord = dbResponse[0]
+      }
+      if(dbResponse1.length > 0){
+        userRecord = dbResponse1[0]
+        userRecord.role = 'admin'
+      }
+  
+      const passwordMatch = verifyPass(password, userRecord.password)
+  
+      if(!passwordMatch){
+        response.status(401).send({ error: 'Invalid Credentials pass'})
+      }else {
+        response.status(200).send({ message: 'Login Successful', id: userRecord.id, role: userRecord.role})
+      }
+      conn.release()
 
-    const passwordMatch = verifyPass(password, userRecord.password)
-
-    if(!passwordMatch){
-      response.status(401).send({ error: 'Invalid Credentials pass'})
-    }else {
-      response.status(200).send({ message: 'Login Successful', id: userRecord.id, role: userRecord.role})
+    } catch (error) {
+      console.error('Error in userLogin route:', error);
+      response.status(500).send({ error: 'Internal Server Error' });
     }
-    conn.release()
+    
   })
 
   app.get('/userLogged', async (request) => {
