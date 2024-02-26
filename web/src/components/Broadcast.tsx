@@ -21,6 +21,7 @@ type Event = {
   costumer: string;
   bu: string;
   start_date: string;
+  end_date: string;
   status: string;
 }
 
@@ -33,7 +34,8 @@ type Card = {
   orders: {
     orderId: number;
     orderCostumer: string;
-    orderStartDate: string;
+    orderStartEarliestDate: string;
+    orderEndLatestDate: string;
     orderBu: string
   }[]
 }
@@ -43,7 +45,7 @@ export function Broadcast() {
   const [workers, setWorkers] = useState<Worker[]>([])
   const [events, setEvents] = useState<Event[]>([])
   const [cards, setCards] = useState<Card[]>([])
-  const [changeWeek, setChangeWeek] = useState<boolean>(false)
+  const [weekToShow, setWeekToShow] = useState<number>(0);
   const [todayWeek, setTodayWeek] = useState<number>(0)
   const [show, setShow] = useState<boolean>(true)
   const [refresh, setRefresh] = useState<boolean>(true)
@@ -68,7 +70,7 @@ export function Broadcast() {
 
   useEffect(() => {
     sleep(700).then(() => setShow(true))
-  }, [changeWeek])
+  }, [weekToShow])
 
   useEffect(() => {
     const assignedEvents = events.filter(event => event.status === 'assigned')
@@ -76,23 +78,46 @@ export function Broadcast() {
     const daysUntilSunday = (currentDate.day() + 7) % 7
     const firstDayOfWeek = currentDate.subtract(daysUntilSunday, 'day').startOf('day')
     const firstDayOfNextWeek = firstDayOfWeek.add(7, 'day')
+    const firstDayOfNextNextWeek = firstDayOfWeek.add(14, 'day')
     const lastDayOfWeek = firstDayOfWeek.add(6, 'days')
     const lastDayOfNextWeek = lastDayOfWeek.add(7, 'day')
+    const lastDayOfNextNextWeek = lastDayOfWeek.add(14, 'day')
     dayjs.extend(weekOfYear)
-    changeWeek ? setTodayWeek(dayjs(firstDayOfNextWeek).week()) : setTodayWeek(dayjs(firstDayOfWeek).week())
     dayjs.extend(isBetween)
-    changeWeek ? (
-      eventsOnThisWeek = assignedEvents.filter(event => dayjs(event.start_date).isBetween(firstDayOfNextWeek, lastDayOfNextWeek, 'day', '[]'))
-    ) : (
-      eventsOnThisWeek = assignedEvents.filter(event => dayjs(event.start_date).isBetween(firstDayOfWeek, lastDayOfWeek, 'day', '[]'))
-    )
-    const earliestEvents = getEarliestEvents(eventsOnThisWeek);
+
+
+      if(weekToShow === 0){
+        setTodayWeek(dayjs(firstDayOfWeek).week())
+        eventsOnThisWeek = assignedEvents.filter(event => dayjs(event.start_date).isBetween(firstDayOfWeek, lastDayOfWeek, 'day', '[]'))
+        
+      }
+      if(weekToShow === 1){
+        setTodayWeek(dayjs(firstDayOfNextWeek).week())
+        eventsOnThisWeek = assignedEvents.filter(event => dayjs(event.start_date).isBetween(firstDayOfNextWeek, lastDayOfNextWeek, 'day', '[]'))
+        
+      }
+      if(weekToShow === 2){
+        setTodayWeek(dayjs(firstDayOfNextNextWeek).week())
+       eventsOnThisWeek = assignedEvents.filter(event => dayjs(event.start_date).isBetween(firstDayOfNextNextWeek, lastDayOfNextNextWeek, 'day', '[]'))
+        
+      }
+    
+    const eventsToUse = getEarliestAndLatestEvents(eventsOnThisWeek);
+    
     setShow(false)
-    setCards(createCards(earliestEvents))
-  }, [events, changeWeek])
+    setCards(createCards(eventsToUse));
 
-  sleep(15000).then(() => { setChangeWeek(!changeWeek); setRefresh(!refresh)})
+  }, [events, weekToShow])
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setWeekToShow(prevWeek => (prevWeek + 1) % 3); // Update weekToShow every 15 seconds
+      setRefresh(prevRefresh => !prevRefresh); // Toggle refresh status every 15 seconds
+    }, 15000);
+  
+    return () => clearInterval(interval);
+  }, []);
+  
   function buColor(bu: string) {
     switch (bu) {
       case 'ER':
@@ -145,52 +170,72 @@ export function Broadcast() {
     return role;
   }
 
-  function getEarliestEvents(events: Event[]): Event[] {
+  function getEarliestAndLatestEvents(events: Event[]): Event[] {
     const groupedEvents: Record<string, Event[]> = {};
+    const groupedEvents1: Record<string, Event[]> = {};
+
     // Group events by worker_id and order_id
     events.forEach((event) => {
-      const key = `${event.worker_id}_${event.order_id}`;
-      if (!groupedEvents[key] || dayjs(event.start_date).isBefore(dayjs(groupedEvents[key][0].start_date))) {
-        groupedEvents[key] = [event];
-      }
+        const key = `${event.worker_id}_${event.order_id}`;
+        if (!groupedEvents[key] || dayjs(event.start_date).isBefore(dayjs(groupedEvents[key][0].start_date))) {
+            groupedEvents[key] = [event];
+        }
+        if(!groupedEvents1[key] || dayjs(event.end_date).isAfter(dayjs(groupedEvents1[key][0].end_date))){
+            groupedEvents1[key] = [event]
+        }
     });
-    // Flatten the groups into a single array of earliest events
-    const earliestEvents: Event[] = Object.values(groupedEvents).flatMap((group) => group);
-    return earliestEvents;
+
+    // Flatten the groups
+    //console.log(groupedEvents)
+    const eventsList: Event[] = Object.values(groupedEvents).flatMap((group) => group);
+    
+    eventsList.forEach((event, index) => {
+      const key = `${event.worker_id}_${event.order_id}`;
+      eventsList[index].end_date = groupedEvents1[key][0].end_date;
+    });
+
+    return eventsList;
   };
 
-  function createCards(events: Event[]): Card[] {
-    const groupedData: Record<string, Card[]> = {};
-    events.forEach((event) => {
+
+
+function createCards(events: Event[]): Card[] {
+  const groupedData: Record<string, Card[]> = {};
+
+  events.forEach((event) => {
       const key = `${event.worker_id}`;
       if (!groupedData[key]) {
-        // If the worker_id doesn't exist in groupedData, create a new entry
-        groupedData[key] = [{
-          workerId: event.worker_id,
-          workerName: getWorkerName(event.worker_id),
-          workerSurname: getWorkerSurname(event.worker_id),
-          workerPhoto: getWorkerPhoto(event.worker_id),
-          workerRole: getWorkerRole(event.worker_id),
-          orders: [{
-            orderId: event.order_id,
-            orderBu: event.bu,
-            orderCostumer: event.costumer,
-            orderStartDate: dayjs(event.start_date).format('DD/MM/YYYY')
-          }]
-        }];
+          // If the worker_id doesn't exist in groupedData, create a new entry
+          groupedData[key] = [{
+              workerId: event.worker_id,
+              workerName: getWorkerName(event.worker_id),
+              workerSurname: getWorkerSurname(event.worker_id),
+              workerPhoto: getWorkerPhoto(event.worker_id),
+              workerRole: getWorkerRole(event.worker_id),
+              orders: [{
+                  orderId: event.order_id,
+                  orderBu: event.bu,
+                  orderCostumer: event.costumer,
+                  orderStartEarliestDate: dayjs(event.start_date).format('DD/MM'),
+                  orderEndLatestDate: dayjs(event.end_date).format('DD/MM')
+              }]
+          }];
       } else {
-        // If the worker_id already exists, append the order to the existing data
-        groupedData[key][0].orders.push({
-          orderId: event.order_id,
-          orderBu: event.bu,
-          orderCostumer: event.costumer,
-          orderStartDate: dayjs(event.start_date).format('DD/MM/YYYY')
-        });
+          // If the worker_id already exists, append the order to the existing data
+          groupedData[key][0].orders.push({
+              orderId: event.order_id,
+              orderBu: event.bu,
+              orderCostumer: event.costumer,
+              orderStartEarliestDate: dayjs(event.start_date).format('DD/MM'),
+              orderEndLatestDate: dayjs(event.end_date).format('DD/MM')
+          });
       }
-    });
-    const cardCreated: Card[] = Object.values(groupedData).flatMap((group) => group);
-    return cardCreated;
-  }
+  });
+
+  const cardCreated: Card[] = Object.values(groupedData).flatMap((group) => group);
+  return cardCreated;
+}
+
 
   useEffect(() => {
     if (cards.length === 0) {
@@ -198,7 +243,7 @@ export function Broadcast() {
     } else {
       setEmptyAgenda(false)
     }
-  }, [events, changeWeek])
+  }, [events, weekToShow])
 
 
   return (
@@ -245,10 +290,15 @@ export function Broadcast() {
                               {card.orders.map((order, i) => {
                                 return (
                                   <div key={i}>
-                                    <div className="bg-white w-[364px] h-[58px] rounded-xl flex items-center justify-between px-3">
+                                    <div className="bg-white w-[364px] h-[58px] rounded-xl flex items-center justify-between gap-1 px-3">
                                       <div className={`${buColor(order.orderBu)} rounded-md w-[45px] flex justify-center font-semibold`}>{order.orderId}</div>
-                                      <div className="text-[#768396]">{order.orderCostumer.substring(7, 25)}</div>
-                                      <div className="text-purple-dark font-bold text-base">{order.orderStartDate}</div>
+                                      <div className="text-[#768396]">{order.orderCostumer.split(' ')[2] + ' ' + order.orderCostumer.split(' ')[3]}</div>
+                                      <div className="flex gap-2">
+
+                                      <div className="text-purple-dark font-bold text-base">{order.orderStartEarliestDate}</div>
+                                      <div>-</div>
+                                      <div className="text-purple-dark font-bold text-base">{order.orderEndLatestDate}</div>
+                                      </div>
                                     </div>
                                   </div>
                                 )

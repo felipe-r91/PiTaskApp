@@ -188,7 +188,7 @@ export function WorkersAssignHours(props: WorkerHoursProps) {
     //Check is the use is not Editing the OS
     if (!props.isEditingOS) {
       //Structure to post data
-      if (formState.availableHours >= 0) {
+      if (formState.availableHours >= 0.0) {
         const orderDetails = workersData.map(worker => ({
           id: worker.id,
           workerName: worker.name,
@@ -208,7 +208,7 @@ export function WorkersAssignHours(props: WorkerHoursProps) {
 
       }
       //Alert user for error on total hours assigned
-      if (formState.availableHours < 0) {
+      if (formState.availableHours < 0.0) {
         event.preventDefault()
         alert("As horas alocadas diferem do total de horas disponíveis para essa OS, por favor revise")
       }
@@ -243,7 +243,7 @@ export function WorkersAssignHours(props: WorkerHoursProps) {
   function SubmitFormCustom(event: FormEvent, id: number) {
     event.preventDefault();
     // Structure to post data
-    if (formState.availableHours >= 0) {
+    if (formState.availableHours >= 0.0) {
       setWorkersData((prevWorkerData) => {
         const updatedWorkerData = prevWorkerData.map((worker) =>
           worker.id === id ? { ...worker, customDaysConcluded: true } : worker
@@ -260,7 +260,7 @@ export function WorkersAssignHours(props: WorkerHoursProps) {
     }
 
     // Alert user for error on total hours assigned
-    if (formState.availableHours < 0) {
+    if (formState.availableHours < 0.0) {
       event.preventDefault();
       alert(
         "As horas alocadas diferem do total de horas disponíveis para essa OS, por favor revise"
@@ -510,7 +510,13 @@ export function WorkersAssignHours(props: WorkerHoursProps) {
       for (var i = 0; i < (customDaysRef.current - 1); i++) {
         updatedWorkersData.pop();
       }
-      customDaysRef.current = 2
+      updatedWorkersData[formState.customWorkerIndex].workerOsHours = 0;
+      //customDaysRef.current = 2
+      const totalAssignedHours = updatedWorkersData.reduce((total, worker) => total + worker.workerOsHours, 0);
+      setFormState((prevFormState) => ({
+        ...prevFormState,
+        availableHours: getOsHours() - totalAssignedHours,
+      }));
       return updatedWorkersData;
     });
   }
@@ -818,6 +824,7 @@ export function WorkersAssignHours(props: WorkerHoursProps) {
                                         });
                                         setTest(true);
                                         props.cntrlBackButton(false);
+                                        customDaysRef.current = 2
                                       }}
                                       className="pl-3">
                                       <TbCirclePlus size={24} color="#8D98A9" />

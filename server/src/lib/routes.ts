@@ -603,7 +603,7 @@ export async function appRoutes(app: FastifyInstance) {
     return ordersToFinish
   })
   app.get('/AllEvents', async () => {
-    const [dbResponse] = await conn.execute('SELECT assigned_os.order_id, assigned_os.worker_id, service_orders.costumer, service_orders.bu, assigned_os.start_date, service_orders.status FROM assigned_os INNER JOIN service_orders WHERE assigned_os.order_id = service_orders.id')
+    const [dbResponse] = await conn.execute('SELECT assigned_os.order_id, assigned_os.worker_id, service_orders.costumer, service_orders.bu, assigned_os.start_date, assigned_os.end_date, service_orders.status FROM assigned_os INNER JOIN service_orders WHERE assigned_os.order_id = service_orders.id')
     return dbResponse
   })
 }

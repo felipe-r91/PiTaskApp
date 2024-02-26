@@ -47,11 +47,13 @@ export function NewUser() {
         .oneOf([Yup.ref('password')], 'Passwords não conferem')
         .required('Obrigatório'),
 
+      photo: Yup.string()
+        .required('Obrigatório escolher uma foto')
     }),
 
 
     onSubmit: async function (values) {
-      
+
       try {
         const formData = new FormData();
         formData.append('name', values.name);
@@ -61,7 +63,7 @@ export function NewUser() {
         formData.append('email', values.email);
         formData.append('role', values.role);
         formData.append('phone', values.phone);
-        
+
         if (currentImage) {
           formData.append('photo', currentImage);
         }
@@ -100,10 +102,11 @@ export function NewUser() {
                 <input
                   type='file'
                   title="avatar"
-                  onChange={(e) => handleSetImage(e)}
+                  onChange={(e) => { handleSetImage(e); formik.handleChange }}
                   className='hidden'
                   id="photo"
                   name="photo"
+                  //value={formik.values.photo.toString()}
                   accept=".jpg, .jpeg, .png"
                 />
                 <button type="button" className="w-[150px] h-[35px] bg-[#EDECFE] text-base text-[#5051F9] hover:bg-[#5051F9] hover:text-white rounded-md ml-[-5px]">
@@ -111,6 +114,9 @@ export function NewUser() {
                     Escolha a foto
                   </label>
                 </button>
+                {formik.errors.photo && formik.touched.photo && (
+                  <span className="text-red-400">{formik.errors.photo}</span>
+                )}
               </div>
               <div className="w-fit h-fit px-14 pt-10 pb-4 flex">
                 <div className="flex flex-col gap-8">

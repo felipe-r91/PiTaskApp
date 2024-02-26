@@ -49,6 +49,8 @@ export function SignIn() {
         .oneOf([Yup.ref('password')], 'Passwords não conferem')
         .required('Obrigatório'),
 
+      photo: Yup.string()
+        .required('Obrigatório escolher uma foto')
     }),
 
 
@@ -63,17 +65,17 @@ export function SignIn() {
         formData.append('email', values.email);
         formData.append('role', values.role);
         formData.append('phone', values.phone);
-        
+
         if (currentImage) {
           formData.append('photo', currentImage);
         }
-    
+
         await api.post('/profile', formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
         });
-    
+
         formik.resetForm();
         setCurrentImage(undefined);
         setPreviewImage('/src/assets/uploads/user.png');
@@ -103,7 +105,7 @@ export function SignIn() {
                 <input
                   type='file'
                   title="avatar"
-                  onChange={(e) => handleSetImage(e)}
+                  onChange={(e) => { handleSetImage(e); formik.handleChange }}
                   className='hidden'
                   id="photo"
                   accept=".jpg, .jpeg, .png"
