@@ -9,6 +9,7 @@ import { hashPass, verifyPass } from "./user/hashPass";
 var customParseFormat = require('dayjs/plugin/customParseFormat');
 import multer from 'fastify-multer';
 let uniqueFileName: string
+let updateBroadcastValue: boolean
 
 const storage = multer.diskStorage({
   destination: function(req, file, cb){
@@ -605,6 +606,16 @@ export async function appRoutes(app: FastifyInstance) {
   app.get('/AllEvents', async () => {
     const [dbResponse] = await conn.execute('SELECT assigned_os.order_id, assigned_os.worker_id, service_orders.costumer, service_orders.bu, assigned_os.start_date, assigned_os.end_date, service_orders.status FROM assigned_os INNER JOIN service_orders WHERE assigned_os.order_id = service_orders.id')
     return dbResponse
+  })
+  app.post('/updateBroadcast', async (request) => {
+    const valueReicived = z.object({
+      update: z.boolean()
+    })
+    const { update } = valueReicived.parse(request.body)
+    updateBroadcastValue = update
+  }) 
+  app.get('/broadcastUpdateValue', async () => {
+    return updateBroadcastValue
   })
 }
 

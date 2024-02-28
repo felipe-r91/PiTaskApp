@@ -8,6 +8,7 @@ import { hashPass, verifyPass } from "./user/hashPass";
 var customParseFormat = require('dayjs/plugin/customParseFormat');
 import multer from 'fastify-multer';
 let uniqueFileName: string
+let updateBroadcastValue: boolean
 
 const storage = multer.diskStorage({
   destination: function(req, file, cb){
@@ -475,10 +476,8 @@ export async function appRoutes(app: FastifyInstance) {
     const conn = await connection()
     const dbResponse = await conn.query(query, [todayZeroHour, todayLastHour, 'completed'])
     const aggregatedResults: Record<number, { orderId: number; costumer: string; workersId: number[] }> = {};
-
     dbResponse.forEach((item: { order_id: any; costumer: any; worker_id: any; }) => {
       const { order_id, costumer, worker_id } = item;
-    
       // If orderId is not in the aggregatedResults object, create an entry
       if (!aggregatedResults[order_id]) {
         aggregatedResults[order_id] = {
@@ -512,6 +511,9 @@ export async function appRoutes(app: FastifyInstance) {
       await conn.query('DELETE FROM `assigned_os` WHERE `worker_id` = ? AND `order_id` = ?', [worker, orderId])
     })
     await conn.query('UPDATE `service_orders` SET `assigned_workers_id` = ? WHERE `id` = ?', [assignedWorkersId, orderId])
+    if(workersIdToUpdate.length === 0){
+      await conn.query('UPDATE `service_orders` SET `status` = ?, `bu` = ?, `annotation` = ?, `planned_hours` = ? WHERE `id` = ?', ['new', 'SB', 'nenhuma', 0.0, orderId])
+    }
     conn.release()
   })
 
@@ -671,9 +673,19 @@ export async function appRoutes(app: FastifyInstance) {
   })
   app.get('/AllEvents', async () => {
     const conn = await connection()
-    const dbResponse = await conn.query('SELECT assigned_os.order_id, assigned_os.worker_id, service_orders.costumer, service_orders.bu, assigned_os.start_date, service_orders.status FROM assigned_os INNER JOIN service_orders WHERE assigned_os.order_id = service_orders.id')
+    const dbResponse = await conn.query('SELECT assigned_os.order_id, assigned_os.worker_id, service_orders.costumer, service_orders.bu, assigned_os.start_date, assigned_os.end_date, service_orders.status FROM assigned_os INNER JOIN service_orders WHERE assigned_os.order_id = service_orders.id')
     conn.release()
     return dbResponse
+  })
+  app.post('/updateBroadcast', async (request) => {
+    const valueReicived = z.object({
+      update: z.boolean()
+    })
+    const { update } = valueReicived.parse(request.body)
+    updateBroadcastValue = update
+  }) 
+  app.get('/broadcastUpdateValue', async () => {
+    return updateBroadcastValue
   })
 }
 
