@@ -229,7 +229,7 @@ export function SignIn() {
                   />
                 </fieldset>
                 <div className="flex pt-52 gap-6 w-full justify-center">
-                  <button type="reset" title="cancel" onClick={() => {handleCancel; nav('/')}}
+                  <button type="reset" title="cancel" onClick={() => { handleCancel; nav('/') }}
                     className='w-20 h-10 rounded-lg bg-[#EDECFE]  text-[#5051F9] hover:bg-[#5051F9] hover:text-white font-medium text-base flex items-center justify-center'>
                     Voltar
                   </button>

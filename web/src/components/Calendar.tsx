@@ -253,7 +253,6 @@ export function Calendar(props: CalendarProps) {
   const calendarRef = useRef<DayPilotCalendar>(null);
 
   function handleTimeRangeSelected(args: DayPilot.NavigatorTimeRangeSelectedArgs) {
-    console.log(args.day)
     calendarRef.current!.control.update({
       startDate: args.day
     });
@@ -272,7 +271,7 @@ export function Calendar(props: CalendarProps) {
       id: order.id,
       fontColor: textColor(order.status),
       backColor: '',
-      text: `OS - ${order.order_id}\n\n${order.costumer.substring(7, 50)} ${textAnnotation(order.status)}`,
+      text: `OS - ${order.order_id}\n\n${order.costumer.split(' ')[2] + ' ' + order.costumer.split(' ')[3] + ' ' + order.costumer.split(' ')[4]} ${textAnnotation(order.status)}`,
       start: new DayPilot.Date(order.start_date).toString(),
       end: new DayPilot.Date(order.end_date).toString(),
       resource: order.worker_id.toString(),

@@ -80,7 +80,7 @@ export function OsStatus() {
               <div className="grid grid-rows-2 grid-flow-col auto-cols-min pl-7 mr-4 gap-4 w-[260px]">
                 {orders.map((order) => (
                   <div key={order.id}>
-                    <OsCard soNumber={order.id} soTitle={order.title.substring(0, 25)} soCostumer={order.costumer.substring(7, 50)} backgColor={"bg-white"} isEditable={true} osBu={order.bu} width={"w-[233px]"} height={"h-[250px]"} osStatus={order.status} fromBacklog={true} createdAt={order.created_at} order={order} />
+                    <OsCard soNumber={order.id} soTitle={order.title.substring(0, 25)} soCostumer={order.costumer} backgColor={"bg-white"} isEditable={true} osBu={order.bu} width={"w-[233px]"} height={"h-[250px]"} osStatus={order.status} fromBacklog={true} createdAt={order.created_at} order={order} />
                   </div>
                 ))}
               </div>

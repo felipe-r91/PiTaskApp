@@ -187,7 +187,7 @@ export function EditOS(props: FormProps) {
                 </div>
                 <div
                   className="text-[#768396] shadow-[#E5E5ED] focus:shadow-purple-light inline-flex h-[35px] w-full flex-1 items-center justify-start rounded-[9px] px-[10px] text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px] cursor-not-allowed">
-                  {orderDetails?.costumer?.substring(7, 50)}
+                  {orderDetails?.costumer?.split(' ')[2] + ' ' + orderDetails?.costumer?.split(' ')[3] + ' ' + orderDetails?.costumer?.split(' ')[4]}
                 </div>
               </div>
               <div className="mb-[15px] grid justify-items-start gap-2">

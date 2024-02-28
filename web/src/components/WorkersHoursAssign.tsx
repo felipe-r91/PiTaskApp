@@ -276,7 +276,7 @@ export function WorkersAssignHours(props: WorkerHoursProps) {
         assignMode: !formState.assignMode, availableHours: getOsHours()
       })
       setWorkersData((prevWorkersData) =>
-        prevWorkersData.map((worker) => ({ ...worker, addDays: false, showAddSequential: false, osDate: '1900-00-00', startHour: '00:00', endHour: '00:00' }))
+        prevWorkersData.map((worker) => ({ ...worker, addDays: false, showAddSequential: false, osDate: '1900-00-00', startHour: '00:00', endHour: '00:00', workerOsHours: 0.0}))
       )
     }
   }
@@ -352,7 +352,7 @@ export function WorkersAssignHours(props: WorkerHoursProps) {
       const updatedWorkersData = prevWorkersData
       //const worker = updatedWorkersData[0]
       var diff1 = (((diff - lunch) / 3600000) * selectedSeqDay * factor)
-      var diff2 = (((diff - lunch) / 3600000) * selectedSeqDay)
+      var diff2 = (((diff - lunch) / 3600000))
       setWorkersData((prevWorkersData) =>
         prevWorkersData.map((worker) => ({
           ...worker,

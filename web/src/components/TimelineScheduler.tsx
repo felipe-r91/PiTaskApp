@@ -194,7 +194,7 @@ export function TimelineScheduler(props: Props) {
     switch(viewType){
       default:
       case 'Week':
-        return `OS - ${orderId}\u00A0\u00A0\u00A0\u00A0${costumer.substring(7, 15)}`
+        return `OS - ${orderId}\u00A0\u00A0\u00A0\u00A0${costumer.split(' ')[2] + ' ' + costumer.split(' ')[3]}`
       case 'Days':
         return `OS ${orderId}`
     }
@@ -358,7 +358,7 @@ export function TimelineScheduler(props: Props) {
       setStartDateCalendar(startDateCalendar.addDays(-7))
       setDays([])
     } else {
-      setStartDateCalendar(startDateCalendar.addDays(-15))
+      setStartDateCalendar(startDateCalendar.addDays(-1))
       setDays([])
     }
     
@@ -369,7 +369,7 @@ export function TimelineScheduler(props: Props) {
       setStartDateCalendar(startDateCalendar.addDays(7))
       setDays([])
     } else {
-      setStartDateCalendar(startDateCalendar.addDays(15))
+      setStartDateCalendar(startDateCalendar.addDays(1))
       setDays([])
     }
   }
@@ -384,7 +384,7 @@ export function TimelineScheduler(props: Props) {
                 <div className="font-semibold text-purple-dark text-base w-[60px]">
                   Semana
                 </div><div className="text-[#768396] shadow-[#E5E5ED]  inline-flex h-[35px] w-[20px] flex-1 items-center justify-center rounded-[9px] px-[20px] text-[15px]  shadow-[0_0_0_1px] outline-none">
-                  {startDateCalendar.weekNumber()}
+                  {startDateCalendar.getDatePart().weekNumber()}
                 </div>
               </div>
             </>

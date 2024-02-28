@@ -164,7 +164,7 @@ export function AssignOneOrderForm(props: FormProps) {
                 className="text-[#768396] shadow-[#E5E5ED] focus:shadow-purple-light inline-flex h-[35px] w-full flex-1 items-center justify-center rounded-[9px] px-[10px] text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px] cursor-not-allowed"
                 id="soCostumer"
                 required
-                value={orderUnassigned?.[0].costumer?.substring(7, 50) ?? ''}
+                value={orderUnassigned?.[0].costumer?.split(' ')[2] + ' ' + orderUnassigned?.[0].costumer?.split(' ')[3] + ' ' + orderUnassigned?.[0].costumer?.split(' ')[4] ?? ''}
                 readOnly
               />
             </fieldset>

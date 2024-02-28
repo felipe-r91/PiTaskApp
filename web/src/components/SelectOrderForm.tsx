@@ -70,7 +70,7 @@ export function SelectOrderForm() {
                     type="button"
                     onClick={() => selectOrder(order.id, index)}
                     key={order.id}>
-                    <OsCard soNumber={order.id} soTitle={order.title.substring(0, 25)} soCostumer={order.costumer.substring(7, 30)} backgColor={"bg-off-white"} isEditable={false} osBu={"SB"} width={" w-[220px]"} height={"h-[150px]"} isSelected={cardBorder[index]} />
+                    <OsCard soNumber={order.id} soTitle={order.title.substring(0, 25)} soCostumer={order.costumer.split(' ')[2] + ' ' + order.costumer.split(' ')[3] + ' ' + order.costumer.split(' ')[4]} backgColor={"bg-off-white"} isEditable={false} osBu={"SB"} width={" w-[220px]"} height={"h-[150px]"} isSelected={cardBorder[index]} />
                   </button>
                 ))}
               </div>

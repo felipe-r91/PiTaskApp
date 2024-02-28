@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { api } from "../lib/axios";
 import { AvatarColab } from "../assets/AvatarColab";
 import dayjs from "dayjs";
@@ -40,6 +40,7 @@ type Card = {
   }[]
 }
 
+
 export function Broadcast() {
 
   const [workers, setWorkers] = useState<Worker[]>([])
@@ -51,6 +52,8 @@ export function Broadcast() {
   const [refresh, setRefresh] = useState<boolean>(true)
   const [emptyAgenda, setEmptyAgenda] = useState<boolean>(false)
   let eventsOnThisWeek: Event[]
+  const [update, setUpdate] = useState(true)
+  const refCards = useRef<Card[]>([])
 
   function sleep(ms: number | undefined) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -65,6 +68,13 @@ export function Broadcast() {
   useEffect(() => {
     api.get('/AllEvents').then(response => {
       setEvents(response.data)
+    })
+  }, [refresh])
+
+  useEffect(() => {
+    api.get('/broadcastUpdateValue').then(response => {
+      setUpdate(response.data)
+      console.log(response.data)
     })
   }, [refresh])
 
@@ -106,6 +116,10 @@ export function Broadcast() {
     
     setShow(false)
     setCards(createCards(eventsToUse));
+    
+    if(update){
+      refCards.current = cards
+    }
 
   }, [events, weekToShow])
 
@@ -186,7 +200,6 @@ export function Broadcast() {
     });
 
     // Flatten the groups
-    //console.log(groupedEvents)
     const eventsList: Event[] = Object.values(groupedEvents).flatMap((group) => group);
     
     eventsList.forEach((event, index) => {
@@ -261,7 +274,7 @@ function createCards(events: Event[]): Card[] {
             :
             <>
               <div className="px-10 pt-7 grid grid-rows-3 grid-flow-col gap-2.5">
-                {cards.map((card, i) => {
+                {refCards.current.map((card, i) => {
                   return (
                     <div key={i}>
                       <Transition
