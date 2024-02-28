@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { TbEyeClosed, TbPlus, TbScreenShare, TbVideo } from "react-icons/tb";
+import { TbCloudOff, TbPlus, TbScreenShare, TbVideo } from "react-icons/tb";
 import { api } from "../lib/axios";
 import { TimelineScheduler } from "./TimelineScheduler";
 import { Workers } from "./Schedule"
@@ -97,10 +97,10 @@ export function Timeline() {
                 </div>
               }
               {!syncHelper &&
-              <button onClick={updateBroadcast} className={`w-[130px] h-[30px] flex justify-center items-center bg-[#EDECFE] text-base text-[#5051F9] hover:bg-[#5051F9] hover:text-white rounded-xl gap-2 ${autoSyncBroadcastDate ? 'cursor-not-allowed' : ''}`}>
+              <button onClick={updateBroadcast} className={`w-[120px] h-[30px] flex justify-center items-center bg-[#EDECFE] text-base text-[#5051F9] hover:bg-[#5051F9] hover:text-white rounded-xl gap-3 ${autoSyncBroadcastDate ? 'cursor-not-allowed' : ''}`}>
                 {!update &&
                   <>
-                    <TbEyeClosed size={22} />
+                    <TbCloudOff size={22} />
                     <div>
                       Offline
                     </div>
