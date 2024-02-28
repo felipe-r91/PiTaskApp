@@ -72,7 +72,7 @@ export function Timeline() {
       if(update){
         setSyncHelper(true)
         sleep(50000).then(() => {
-          setSyncHelper(false)
+          setSyncHelper(false);
         })
       }    
     }, [update])
