@@ -10,6 +10,7 @@ import { Broadcast } from './components/Broadcast';
 import { Login } from './components/Login';
 import { SignIn } from './components/SignIn';
 import { useAuth } from './components/AuthContext';
+import { Settings } from './components/Settings';
 
 
 export function App() {
@@ -31,6 +32,7 @@ export function App() {
             {user && <Route path='/NewUser' element={<NewUser />} />}
             {user && <Route path='/Broadcast' element={<Broadcast/>} />}
             {!user && <Route path='/SignIn' element={<SignIn/>} />}
+            {user && <Route path='/Settings' element={<Settings/>}/>}
             {user && <Route path='*' element={<Navigate to='/Dashboard' />} />}
           </Routes>
         </div>

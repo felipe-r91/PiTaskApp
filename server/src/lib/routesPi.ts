@@ -147,6 +147,12 @@ export async function appRoutes(app: FastifyInstance) {
     return dbResponse;
   })
 
+  app.get('/admins', async () => {
+    const conn = await connection()
+    const [dbResponse] = await conn.query('SELECT * FROM admins');
+    return dbResponse;
+  })
+
   app.get('/AllOrders',async () => {
     const conn = await connection()
     const dbResponse = await conn.query('SELECT * FROM `service_orders`')

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { TbCalendar, TbDashboard, TbTimelineEvent, TbReport, TbUserPlus, TbSettings, TbLogout } from 'react-icons/tb';
 import '../styles/sideNavIcon.css';
 import { Logo } from '../assets/Logo';
@@ -44,7 +44,7 @@ export function SideNav() {
     { name: 'Cronograma', link: '/Schedule', icon: TbCalendar },
     { name: 'Linha do Tempo', link: '/Timeline', icon: TbTimelineEvent },
     { name: 'Novo Usuário', link: '/NewUser', icon: TbUserPlus },
-    { name: 'Configurações', link: '/', icon: TbSettings },
+    { name: 'Configurações', link: '/Settings', icon: TbSettings },
     { name: 'Logout', link: '/', icon: TbLogout}
   ]
 
